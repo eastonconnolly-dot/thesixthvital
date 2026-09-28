@@ -16,6 +16,7 @@ class TestConfig(Config):
     ADMIN_PASSWORD = "test-admin-password"
     STRIPE_SECRET_KEY = ""  # empty -> stripe_client uses its stub path, no real network calls
     STRIPE_WEBHOOK_SECRET = "whsec_stub"
+    ANTHROPIC_API_KEY = "sk-ant-test-stub"  # patient_sim calls are mocked in tests; this only satisfies the configured-check
 
 
 @pytest.fixture

@@ -2,8 +2,10 @@
 
 Business stack for RPSAS, a physician-communication training company. See
 [REUSE.md](REUSE.md) for how this relates to the founder's existing multi-tenant
-platform ("the Hub") — short version: standalone, using the Hub as a pattern
-reference rather than a runtime dependency.
+platform ("the Hub") — short version: the Hub is the CRM/business-ops layer
+(leads, deals, pipeline — already solved, used loosely rather than rebuilt);
+this repo is the marketing site plus the part the Hub can't do at all — the
+AI training platform.
 
 `BRAND_NAME` (env var, api-side; `site/js/brand.js` on the static site) controls
 every visible instance of the name so it can be renamed in one place.
@@ -16,7 +18,7 @@ rpsas/
   api/         Flask app → Render (Postgres)
   outreach/    list builders + sequence engine (Phase 2)
   content/     content engine (Phase 3)
-  app/         practice app / AI simulated patients (Phase 4)
+  app/         (unused — Practice is served by api/, one of the two options the brief allowed)
   ops/         dashboards, digest, backups (Phase 5)
   shared/      brand tokens, rubric, prompts, email templates
 ```
@@ -129,3 +131,81 @@ to upgrade automatically, no code changes needed.
       advances deal stage
 - [x] Badge PDF/PNG render correctly for a given participant
 - [x] Scorecard PDF (single + cohort) renders correctly with real rubric data
+
+## Phase 4 — Practice (the AI training platform)
+
+Built ahead of Phases 2/3, at the founder's direction — this is RPSAS's actual
+product differentiator (the Hub already solves CRM/pipeline; nothing in the
+Hub does simulated-patient training). Lives inside `api/` — magic-link auth,
+a Claude-driven patient/interviewer simulation with a randomized mid-encounter
+mode shift, rubric scoring, micro-lessons, and Stripe subscriptions with a
+7-day trial.
+
+- `shared/prompts/scenarios.py` — the scenario catalog (2 applicant, 4
+  physician) and the four P-mode persona descriptions.
+- `api/services/patient_sim.py` — drives the Claude conversation (patient
+  plays "assistant", trainee plays "user") and the post-encounter scoring
+  call (JSON-schema-constrained output, re-validated against
+  `shared/rubric.py`).
+- `api/services/magic_link.py` — token-based auth (15-minute expiry,
+  single-use), modeled on the Hub's own `hub/homeowner_portal.py` pattern.
+  Signup and login are the same form; a new email requires a `track`.
+- `api/routes/practice.py` + `api/templates/practice/*.html` — dashboard,
+  scenario picker, a chat-style encounter page (optional mic input / spoken
+  replies via the browser's Web Speech API, no server dependency), and the
+  five-lesson unlock progression (`shared/models.py`'s `MICRO_LESSONS` order:
+  read → pick → speak → ask → shift — lesson **content** is a placeholder,
+  same as the privacy/terms pages, flagged for the founder to fill in).
+- Subscriptions: `$49`/`$149`/`$199` (applicant/physician/program-seat),
+  7-day trial, via `stripe_client.create_subscription_checkout_session` — set
+  `STRIPE_PRICE_*` once those prices exist in the Stripe dashboard.
+- Every signup also creates a `Lead` (`source="practice_app"`), per the
+  brief's "every user is a lead" requirement — no separate CRM table.
+
+### Local development
+
+Same venv as Phase 1, plus one more env var:
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...   # no stub mode — see below
+flask run --port 5050
+```
+
+Visit `http://localhost:5050/practice/login`. Without a live Gmail sender
+configured, the login endpoint hands the magic link straight back in the
+response (`dev_link`) instead of silently doing nothing.
+
+**No stub mode for Claude.** Unlike Stripe (deposit/subscription checkout
+both fall back to stub sessions) or e-sign (fully native, no vendor at all),
+there's no meaningful fake response for an AI patient conversation — with
+`ANTHROPIC_API_KEY` unset, starting a new session returns a clean `503`
+rather than crashing, and everything *around* the model call (auth, shift
+timing, access gating, scoring persistence, Stripe) is fully tested with the
+Claude calls mocked. Conversation quality itself can only be judged with a
+real key. Model is `claude-sonnet-5` by default (`CLAUDE_MODEL` env var to
+override) — a deliberate cost call for a many-turn-per-session product at
+this price point, not a hidden one; bump it if quality doesn't hold up.
+
+### Tests
+
+18 additional tests (56 total) covering magic-link issuance/expiry/single-use,
+session creation and access-gating (trial expired → 402, Claude not
+configured → 503), the mid-encounter shift firing at the stored turn count
+and never re-firing, score persistence, lesson-completion idempotency, and
+the subscription webhook updating `subscription_status`.
+
+### Acceptance checklist (Phase 4)
+
+- [x] A user without an account can sign up via magic link and lands on the
+      dashboard with a 7-day trial
+- [x] Starting an encounter calls the patient simulation and persists the
+      opening line
+- [x] The mode shift fires at the stored random turn (3-6) and only once
+- [x] Ending an encounter scores it on the 5-dimension rubric with quotes,
+      names the P mode(s), marks whether the shift was caught, and returns
+      one drill
+- [x] Micro-lessons unlock in order (read → pick → speak → ask → shift)
+- [x] Subscription checkout works (stub verified; real Stripe price ids not
+      exercised here) and the webhook updates subscription status
+- [x] The signup becomes a `Lead` with `track` and `source="practice_app"`
+- [ ] Live conversation quality — needs `ANTHROPIC_API_KEY`, not verifiable here

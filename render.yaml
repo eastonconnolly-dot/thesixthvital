@@ -39,6 +39,16 @@ services:
         sync: false
       - key: QUO_API_KEY
         sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CLAUDE_MODEL
+        value: claude-sonnet-5
+      - key: STRIPE_PRICE_APPLICANT
+        sync: false
+      - key: STRIPE_PRICE_PHYSICIAN
+        sync: false
+      - key: STRIPE_PRICE_PROGRAM_SEAT
+        sync: false
       - key: COMPANY_MAILING_ADDRESS
         sync: false
       - key: SITE_BASE_URL

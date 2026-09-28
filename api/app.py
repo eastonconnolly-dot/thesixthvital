@@ -19,11 +19,13 @@ def create_app(config_object=Config):
     from routes.admin import bp as admin_bp
     from routes.webhooks import bp as webhooks_bp
     from routes.esign import bp as esign_bp
+    from routes.practice import bp as practice_bp
 
     app.register_blueprint(public_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(webhooks_bp)
     app.register_blueprint(esign_bp)
+    app.register_blueprint(practice_bp)
 
     register_cli(app)
 

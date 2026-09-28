@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard — {{ config.BRAND_NAME }} Practice</title>
+  <style>
+    :root { --ink:#17263B; --ivory:#F4EFE6; --amber:#E0A458; --muted:#8A97A8; --border:#d9d3c6; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--ivory); color:var(--ink); }
+    header { background:var(--ink); color:var(--ivory); padding:16px 24px; display:flex; justify-content:space-between; align-items:center; }
+    header a { color:var(--ivory); text-decoration:none; font-weight:600; }
+    main { max-width:920px; margin:0 auto; padding:32px 24px; }
+    h1, h2 { font-family: Georgia, serif; }
+    .grid { display:grid; grid-template-columns:2fr 1fr; gap:20px; }
+    @media (max-width:760px) { .grid { grid-template-columns:1fr; } }
+    .card { background:#fff; border-radius:12px; padding:24px; margin-bottom:20px; box-shadow:0 4px 16px rgba(23,38,59,0.08); }
+    table { width:100%; border-collapse:collapse; }
+    th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--border); font-size:0.88rem; }
+    .tag { display:inline-block; padding:2px 8px; border-radius:999px; background:var(--border); font-size:0.72rem; }
+    .btn { display:inline-block; padding:9px 18px; border-radius:8px; background:var(--amber); color:var(--ink); text-decoration:none; border:none; font-weight:600; cursor:pointer; font-size:0.9rem; }
+    .btn-ghost { background:none; border:1px solid var(--border); color:var(--ink); }
+    select { padding:8px; border-radius:6px; border:1px solid var(--border); font:inherit; }
+    .lesson-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:0.9rem; }
+    .lesson-row:last-child { border-bottom:none; }
+    .locked { color:var(--muted); }
+    .trial-banner { background:#fff8e8; border:1px solid #E0A458; border-radius:10px; padding:14px 18px; margin-bottom:20px; font-size:0.9rem; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="{{ url_for('practice.dashboard') }}">{{ config.BRAND_NAME }} Practice</a>
+    <a href="{{ url_for('practice.logout') }}">Log out</a>
+  </header>
+  <main>
+    {% if user.subscription_status == "trialing" %}
+    <div class="trial-banner">
+      <span>Free trial — {{ user.trial_ends_at.strftime("%b %d") if user.trial_ends_at else "" }}.</span>
+      <button class="btn" id="subscribeBtn">Subscribe now</button>
+    </div>
+    {% elif not user.has_access() %}
+    <div class="trial-banner">
+      <span>Your trial has ended.</span>
+      <button class="btn" id="subscribeBtn">Subscribe to keep practicing</button>
+    </div>
+    {% endif %}
+
+    <div class="grid">
+      <div>
+        <h1>New encounter</h1>
+        <div class="card">
+          <label style="font-weight:600; font-size:0.85rem;">Scenario</label>
+          <select id="scenarioSelect">
+            {% for key, s in scenarios.items() %}
+              {% if s.track == user.track or user.track == "program" %}
+              <option value="{{ key }}">{{ s.label }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+          <div style="margin-top:14px;">
+            <button class="btn" id="startBtn">Start encounter</button>
+          </div>
+        </div>
+
+        <h1>Past sessions</h1>
+        <div class="card">
+          <table>
+            <thead><tr><th>Scenario</th><th>Score</th><th>Shift caught</th><th></th></tr></thead>
+            <tbody>
+              {% for s in sessions %}
+              <tr>
+                <td>{{ scenarios[s.scenario_key].label }}</td>
+                <td>{{ s.total_score() if s.status == "completed" else "in progress" }}</td>
+                <td>{{ "Yes" if s.shift_caught else ("No" if s.shift_caught is not none else "—") }}</td>
+                <td><a class="btn btn-ghost" href="{{ url_for('practice.session_detail', session_id=s.id) }}">View</a></td>
+              </tr>
+              {% else %}
+              <tr><td colspan="4">No sessions yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <h2>Micro-lessons</h2>
+        <div class="card">
+          {% for key in ["read", "pick", "speak", "ask", "shift"] %}
+          <div class="lesson-row">
+            <span class="{{ 'locked' if key != next_lesson and key not in completed_lessons }}">
+              {{ key|capitalize }}{% if key in completed_lessons %} ✓{% endif %}
+            </span>
+            {% if key == next_lesson %}
+            <button class="btn btn-ghost" data-lesson="{{ key }}" onclick="completeLesson('{{ key }}')">Mark done</button>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.getElementById('startBtn').addEventListener('click', () => {
+      const scenario_key = document.getElementById('scenarioSelect').value;
+      fetch('/practice/sessions', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scenario_key }),
+      })
+        .then(r => r.json().then(data => ({ ok: r.ok, data })))
+        .then(({ ok, data }) => {
+          if (!ok) { alert(data.message || data.error); return; }
+          window.location.href = '/practice/sessions/' + data.session_id;
+        });
+    });
+
+    const subscribeBtn = document.getElementById('subscribeBtn');
+    if (subscribeBtn) {
+      subscribeBtn.addEventListener('click', () => {
+        fetch('/practice/subscribe', { method: 'POST' })
+          .then(r => r.json())
+          .then(data => { if (data.checkout_url) window.location.href = data.checkout_url; });
+      });
+    }
+
+    function completeLesson(key) {
+      fetch('/practice/lessons/' + key + '/complete', { method: 'POST' })
+        .then(() => window.location.reload());
+    }
+  </script>
+</body>
+</html>

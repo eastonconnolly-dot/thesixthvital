@@ -7,6 +7,14 @@ def utcnow():
     return datetime.now(timezone.utc)
 
 
+def _aware(dt):
+    """SQLite drops tzinfo on read even for DateTime(timezone=True) columns;
+    Postgres doesn't. Normalize so comparisons work on both backends."""
+    if dt is not None and dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
 class Lead(db.Model):
     __tablename__ = "leads"
 
@@ -254,3 +262,93 @@ class Asset(db.Model):
     kind = db.Column(db.String(30))  # video | image | pdf
     path = db.Column(db.String(500))
     created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+
+
+# ── RPSAS Practice (the training platform) ──────────────────────────────
+
+MICRO_LESSONS = ("read", "pick", "speak", "ask", "shift")  # unlock in this order
+
+
+class PracticeUser(db.Model):
+    __tablename__ = "practice_users"
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(320), nullable=False, unique=True, index=True)
+    name = db.Column(db.String(200))
+    track = db.Column(db.String(20), nullable=False)  # applicant | physician | program
+    lead_id = db.Column(db.Integer, db.ForeignKey("leads.id"))
+
+    stripe_customer_id = db.Column(db.String(200))
+    stripe_subscription_id = db.Column(db.String(200))
+    subscription_status = db.Column(db.String(30))  # trialing | active | past_due | canceled | None
+    trial_ends_at = db.Column(db.DateTime(timezone=True))
+
+    created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+
+    sessions = db.relationship("PracticeSession", backref="user", lazy=True)
+    lesson_progress = db.relationship("MicroLessonProgress", backref="user", lazy=True)
+
+    def has_access(self):
+        if self.subscription_status == "active":
+            return True
+        if self.trial_ends_at and utcnow() <= _aware(self.trial_ends_at):
+            return True
+        return False
+
+    def to_dict(self):
+        return {
+            "id": self.id, "email": self.email, "name": self.name, "track": self.track,
+            "subscription_status": self.subscription_status,
+            "trial_ends_at": self.trial_ends_at.isoformat() if self.trial_ends_at else None,
+            "has_access": self.has_access(),
+        }
+
+
+class MagicLinkToken(db.Model):
+    __tablename__ = "magic_link_tokens"
+
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(64), nullable=False, unique=True, index=True)
+    email = db.Column(db.String(320), nullable=False)
+    created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+    expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    used_at = db.Column(db.DateTime(timezone=True))
+
+
+SESSION_STATUSES = ("in_progress", "completed")
+
+
+class PracticeSession(db.Model):
+    __tablename__ = "practice_sessions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("practice_users.id"), nullable=False)
+    scenario_key = db.Column(db.String(60), nullable=False)
+    initial_mode = db.Column(db.String(20), nullable=False)
+    shift_after_turn = db.Column(db.Integer, nullable=False)
+    shift_to_mode = db.Column(db.String(20))  # set once the shift has actually occurred
+    transcript = db.Column(db.JSON, nullable=False, default=list)  # [{"role": "patient"|"trainee", "text": ...}]
+    status = db.Column(db.String(20), nullable=False, default="in_progress")
+
+    scores = db.Column(db.JSON)  # {"read_accuracy": 4, ...}
+    quotes = db.Column(db.JSON)  # {"read_accuracy": "...", ...}
+    named_p_initial = db.Column(db.String(20))
+    named_p_after_shift = db.Column(db.String(20))
+    shift_caught = db.Column(db.Boolean)
+    drill = db.Column(db.Text)
+
+    created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+    completed_at = db.Column(db.DateTime(timezone=True))
+
+    def total_score(self):
+        return sum(self.scores.values()) if self.scores else None
+
+
+class MicroLessonProgress(db.Model):
+    __tablename__ = "micro_lesson_progress"
+    __table_args__ = (db.UniqueConstraint("user_id", "lesson_key"),)
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("practice_users.id"), nullable=False)
+    lesson_key = db.Column(db.String(20), nullable=False)
+    completed_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)

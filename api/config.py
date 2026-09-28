@@ -23,6 +23,16 @@ class Config:
 
     QUO_API_KEY = os.environ.get("QUO_API_KEY", "")
 
+    ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+    CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-5")
+
+    PRACTICE_PRICES = {
+        "applicant": {"label": "Applicant", "amount_cents": 4900, "stripe_price_id": os.environ.get("STRIPE_PRICE_APPLICANT", "")},
+        "physician": {"label": "Physician", "amount_cents": 14900, "stripe_price_id": os.environ.get("STRIPE_PRICE_PHYSICIAN", "")},
+        "program_seat": {"label": "Program Seat", "amount_cents": 19900, "stripe_price_id": os.environ.get("STRIPE_PRICE_PROGRAM_SEAT", "")},
+    }
+    PRACTICE_TRIAL_DAYS = 7
+
     COMPANY_MAILING_ADDRESS = os.environ.get(
         "COMPANY_MAILING_ADDRESS", "123 Main Street, Suite 100, Spokane, WA 99201"
     )
