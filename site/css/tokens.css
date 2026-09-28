@@ -1,0 +1,41 @@
+/* RPSAS brand tokens — single source of truth for color and type.
+   Rename the brand by editing site/js/brand.js, not this file. */
+:root {
+  --ink: #17263B;
+  --ivory: #F4EFE6;
+  --amber: #E0A458;
+  --muted: #8A97A8;
+
+  --font-display: 'Playfair Display', 'Iowan Old Style', Georgia, serif;
+  --font-body: 'Source Sans 3', 'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --bg: var(--ivory);
+  --fg: var(--ink);
+  --fg-muted: var(--muted);
+  --accent: var(--amber);
+  --surface: #ffffff;
+  --border: rgba(23, 38, 59, 0.12);
+  --shadow: 0 12px 40px rgba(23, 38, 59, 0.10);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: var(--ink);
+    --fg: var(--ivory);
+    --fg-muted: var(--muted);
+    --accent: var(--amber);
+    --surface: #1E2F47;
+    --border: rgba(244, 239, 230, 0.12);
+    --shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: var(--ink);
+  --fg: var(--ivory);
+  --fg-muted: var(--muted);
+  --accent: var(--amber);
+  --surface: #1E2F47;
+  --border: rgba(244, 239, 230, 0.12);
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-brand-title>Apply — RPSAS</title>
+  <meta name="description" content="Apply for an RPSAS communication intensive." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a href="index.html" class="brand-mark" data-brand>RPSAS<span>.</span></a>
+      <nav class="primary-nav">
+        <a href="index.html">Home</a>
+        <a href="method.html">Method</a>
+        <a href="programs.html">Programs</a>
+        <a href="proof.html">Proof</a>
+        <a href="apply.html" class="btn btn-primary" aria-current="page">Apply</a>
+      </nav>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="tight" style="padding-top:56px;">
+      <div class="wrap">
+        <div class="eyebrow">Apply</div>
+        <h1>Tell us where you are</h1>
+        <p class="lede">Two minutes. If it's a fit, you'll get a link to book a call. If it's not there yet, you'll get resources instead.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="form-msg" role="status"></div>
+        <form class="apply-form" novalidate>
+          <div class="field">
+            <label for="name">Full name *</label>
+            <input id="name" name="name" type="text" required autocomplete="name" />
+          </div>
+          <div class="field">
+            <label for="email">Email *</label>
+            <input id="email" name="email" type="email" required autocomplete="email" />
+          </div>
+          <div class="field">
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" />
+          </div>
+
+          <fieldset>
+            <legend>Which track fits you? *</legend>
+            <div class="radio-row">
+              <label><input type="radio" name="track" value="applicant" required /> Med-school / residency applicant</label>
+              <label><input type="radio" name="track" value="physician" /> Physician or surgeon</label>
+              <label><input type="radio" name="track" value="program" /> Residency / fellowship program</label>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="org">Organization</label>
+            <input id="org" name="org" type="text" placeholder="Practice, hospital, or program name" />
+            <div class="hint">Leave blank if not applicable.</div>
+          </div>
+          <div class="field">
+            <label for="role">Your role</label>
+            <input id="role" name="role" type="text" placeholder="e.g. Program Director, MS4, Orthopedic Surgeon" />
+          </div>
+          <div class="field">
+            <label for="state">State</label>
+            <input id="state" name="state" type="text" placeholder="WA" maxlength="2" />
+          </div>
+
+          <fieldset>
+            <legend>Is a budget in the relevant range already approved? *</legend>
+            <div class="radio-row">
+              <label><input type="radio" name="budget_ok" value="yes" required /> Yes</label>
+              <label><input type="radio" name="budget_ok" value="no" /> Not yet</label>
+              <label><input type="radio" name="budget_ok" value="unsure" /> Not sure</label>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="timeline">When do you need this delivered?</label>
+            <input id="timeline" name="timeline" type="text" placeholder="e.g. within 60 days, next academic year" />
+          </div>
+
+          <div class="field">
+            <label for="situation">What's the situation? *</label>
+            <textarea id="situation" name="situation" required placeholder="What's prompting this, and what would a good outcome look like?"></textarea>
+          </div>
+
+          <div>
+            <button type="submit" class="btn btn-primary">Submit application</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>
+        <div data-brand style="font-family:var(--font-display); font-weight:700;">RPSAS</div>
+        <div>123 Main Street, Suite 100, Spokane, WA 99201</div>
+      </div>
+      <div class="footer-links">
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="mailto:hello@rpsas.example.com">hello@rpsas.example.com</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/brand.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/apply.js"></script>
+</body>
+</html>

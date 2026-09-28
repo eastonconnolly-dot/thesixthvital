@@ -1,0 +1,13 @@
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+psycopg2-binary==2.9.9
+gunicorn==22.0.0
+python-dotenv==1.0.1
+stripe==10.12.0
+reportlab==4.2.5
+Pillow==10.4.0
+requests==2.32.3
+google-auth==2.34.0
+google-auth-oauthlib==1.2.1
+google-api-python-client==2.145.0
+pytest==8.3.3

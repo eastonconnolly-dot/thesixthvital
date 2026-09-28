@@ -1,0 +1,19 @@
+{% extends "admin/base.html" %}
+{% block title %}Deal #{{ deal.id }}{% endblock %}
+{% block content %}
+<h1>{{ lead.name }} — {{ package_label }}</h1>
+<div class="card">
+  <p><strong>Amount:</strong> ${{ "%.2f"|format(deal.amount_cents / 100) }}</p>
+  <p><strong>Stage:</strong> <span class="tag">{{ deal.stage }}</span></p>
+  <p><strong>Delivery date:</strong> {{ deal.delivery_date or "TBD" }}</p>
+  <p><strong>Deposit paid:</strong> {{ "Yes" if deal.deposit_paid else "No" }}</p>
+  <p><strong>Signed:</strong> {{ deal.signed_at.strftime("%b %d, %Y") if deal.signed_at else "Not yet" }}</p>
+  {% if deal.signwell_envelope_id %}<p><strong>SignWell envelope:</strong> {{ deal.signwell_envelope_id }}</p>{% endif %}
+
+  {% if not deal.proposal_pdf_path and not deal.signwell_envelope_id %}
+  <form method="post" action="{{ url_for('admin.generate_proposal', deal_id=deal.id) }}">
+    <button class="btn" type="submit">Generate proposal &amp; send for signature</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

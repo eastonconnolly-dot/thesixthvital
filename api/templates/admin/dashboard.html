@@ -1,0 +1,56 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Leads</h1>
+<div class="card">
+  <table>
+    <thead><tr><th>Name</th><th>Email</th><th>Track</th><th>Org</th><th>Status</th><th>Created</th><th></th></tr></thead>
+    <tbody>
+      {% for lead in leads %}
+      <tr>
+        <td>{{ lead.name }}</td>
+        <td>{{ lead.email }}</td>
+        <td><span class="tag">{{ lead.track }}</span></td>
+        <td>{{ lead.org or "—" }}</td>
+        <td>{{ lead.status }}</td>
+        <td>{{ lead.created.strftime("%b %d, %Y") if lead.created else "—" }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.create_deal', lead_id=lead.id) }}" style="display:flex; gap:6px; align-items:center; margin:0;">
+            <select name="package" style="width:auto; margin:0;">
+              {% for key, pkg in packages.items() %}
+              <option value="{{ key }}">{{ pkg.label }}</option>
+              {% endfor %}
+            </select>
+            <input type="date" name="delivery_date" style="width:auto; margin:0;" />
+            <button class="btn" type="submit">Create deal</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7">No leads yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h1>Deals</h1>
+<div class="card">
+  <table>
+    <thead><tr><th>Lead</th><th>Package</th><th>Amount</th><th>Stage</th><th>Delivery</th><th></th></tr></thead>
+    <tbody>
+      {% for deal in deals %}
+      <tr>
+        <td>{{ deal.lead.name }}</td>
+        <td>{{ packages.get(deal.package, {}).get("label", deal.package) }}</td>
+        <td>${{ "%.2f"|format(deal.amount_cents / 100) }}</td>
+        <td><span class="tag">{{ deal.stage }}</span></td>
+        <td>{{ deal.delivery_date or "TBD" }}</td>
+        <td><a class="btn" href="{{ url_for('admin.deal_detail', deal_id=deal.id) }}">Open</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">No deals yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

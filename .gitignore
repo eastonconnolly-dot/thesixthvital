@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# Env / secrets
+.env
+*.env.local
+google-token*.json
+google-oauth-client*.json
+
+# Databases
+*.db
+instance/
+
+# Node (site/build.js has no deps, but keep this clean if that changes)
+node_modules/
+
+# OS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
