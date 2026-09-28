@@ -11,6 +11,7 @@ union+null-enum for the one nullable field, `recommended_package`)."""
 import json
 
 from services import claude_client
+from services.notify_utils import first_name as _first_name
 
 MAX_TOKENS_REPLY = 200
 MAX_TOKENS_COMPLETE = 700
@@ -47,7 +48,7 @@ def start_qualifier(lead):
     call) — the opener doesn't need generation, and keeping it deterministic
     means the qualifier flow is exercisable with zero ANTHROPIC_API_KEY
     calls until the lead actually starts talking."""
-    first_name = (lead.name or "").split(" ")[0] or "there"
+    first_name = _first_name(lead.name)
     return (
         f"Hi {first_name} — before we get you on the calendar, I want to make sure we point "
         f"you at the right next step. Mind if I ask a few quick questions? First: what's "

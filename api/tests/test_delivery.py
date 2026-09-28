@@ -69,6 +69,26 @@ def test_complete_session_creates_scorecards_and_provisions_seats(app):
         assert any(kw.kwargs["subject"].startswith("Your") and "scorecard" in kw.kwargs["subject"] for kw in scorecard_calls)
 
 
+def test_complete_session_greets_participant_with_no_name_gracefully(app):
+    """Regression test for a bug the reuse-cleanup pass in services/delivery.py
+    fixed: the old inline `(name or "").split(" ")[0] or name` pattern fell
+    back to the original (falsy) name instead of a greeting default, so a
+    participant with no name rendered as a literal "Hi None," in the
+    scorecard email. services.notify_utils.first_name() falls back to
+    "there" instead."""
+    with app.app_context():
+        deal = _make_deal(app)
+        participants = [_participant("", "noname@example.com")]
+
+        with patch("services.delivery.gmail_client.send_email", return_value=_SEND_EMAIL_STUB) as mock_send:
+            result = complete_session(deal, None, "intensive_day_1", participants)
+
+        assert result["status"] == "ok"
+        scorecard_call = next(c for c in mock_send.call_args_list if c.kwargs.get("to_email") == "noname@example.com" and c.kwargs.get("attachments"))
+        assert "Hi there," in scorecard_call.kwargs["html_body"]
+        assert "Hi None" not in scorecard_call.kwargs["html_body"]
+
+
 def test_complete_session_is_idempotent(app):
     with app.app_context():
         deal = _make_deal(app)

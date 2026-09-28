@@ -18,6 +18,7 @@ from collections import Counter
 from flask import current_app
 
 from services import gmail_client
+from services.notify_utils import unsubscribe_url
 
 
 def submit_badge_print_order(deal, participant_names):
@@ -58,11 +59,9 @@ def submit_badge_print_order(deal, participant_names):
     <p>Ship to: {current_app.config["COMPANY_MAILING_ADDRESS"]}</p>
     """
 
-    unsubscribe_url = f"{current_app.config['API_BASE_URL']}/unsubscribe?lead_id={lead.id}" if lead else current_app.config["API_BASE_URL"]
-
     return gmail_client.send_email(
         to_email=vendor_email,
         subject=f"[Badge Order] {brand} Deal #{deal.id} — {lead.name if lead else 'Unknown'}",
         html_body=html_body,
-        unsubscribe_url=unsubscribe_url,
+        unsubscribe_url=unsubscribe_url(lead.id if lead else None),
     )

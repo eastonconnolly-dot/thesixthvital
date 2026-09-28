@@ -16,7 +16,6 @@ NOT reuse outreach/engine/sequences.py's SequenceEnrollment machinery --
 see the docstring on send_delivery_reminders for why.
 """
 
-import secrets
 from datetime import datetime, time, timedelta, timezone
 
 from flask import current_app
@@ -24,17 +23,19 @@ from flask import current_app
 from extensions import db
 from models import CohortRoster, Deal, IntakeForm, UploadLink, utcnow
 from services import calendar_client, gmail_client
+from services.notify_utils import first_name, make_token
+from services.notify_utils import unsubscribe_url as _unsubscribe_url_for
 from services.print_vendor import submit_badge_print_order
 
 log_prefix = "onboarding"
 
 
 def _token():
-    return secrets.token_urlsafe(24)
+    return make_token(24)
 
 
 def _unsubscribe_url(lead):
-    return f"{current_app.config['API_BASE_URL']}/unsubscribe?lead_id={lead.id}"
+    return _unsubscribe_url_for(lead.id if lead else None)
 
 
 def _initial_participants(deal):
@@ -53,7 +54,7 @@ def _send_welcome_email(deal, lead, intake_url, upload_urls):
         for u in upload_urls
     )
     html_body = f"""
-    <p>Hi {lead.name.split(" ")[0] if lead.name else "there"},</p>
+    <p>Hi {first_name(lead.name)},</p>
     <p>Welcome to {brand} -- your session is officially on the books. Here's
     everything to take care of before delivery day:</p>
     <ol>
@@ -82,33 +83,34 @@ def _delivery_datetime(deal):
     return datetime.combine(deal.delivery_date, time(9, 0), tzinfo=timezone.utc)
 
 
-def _book_calendar_holds(deal, lead):
+def _try_book_hold(deal, dt, summary, attendee_email, label):
     """Best-effort: a Calendar API hiccup shouldn't block the rest of
     onboarding (mirrors services/hub_sync.py's "never let an external call
-    block the caller" pattern). Returns the list of holds actually booked."""
-    booked = []
+    block the caller" pattern). Returns `label` if the hold was booked,
+    None otherwise."""
+    try:
+        calendar_client.book_slot(dt, summary=summary, attendee_email=attendee_email)
+        return label
+    except Exception as exc:
+        current_app.logger.warning("%s: %s calendar hold failed for deal=%s: %s", log_prefix, label, deal.id, exc)
+        return None
 
+
+def _book_calendar_holds(deal, lead):
+    """Returns the list of holds actually booked (out of "delivery" and
+    "checkin_30day" -- either, both, or neither)."""
+    brand = current_app.config["BRAND_NAME"]
     delivery_dt = _delivery_datetime(deal)
-    try:
-        calendar_client.book_slot(
-            delivery_dt, summary=f"{current_app.config['BRAND_NAME']} delivery -- {lead.name}",
-            attendee_email=lead.email,
-        )
-        booked.append("delivery")
-    except Exception as exc:
-        current_app.logger.warning("%s: delivery calendar hold failed for deal=%s: %s", log_prefix, deal.id, exc)
-
     checkin_dt = delivery_dt + timedelta(days=30)
-    try:
-        calendar_client.book_slot(
-            checkin_dt, summary=f"{current_app.config['BRAND_NAME']} 30-day check-in -- {lead.name}",
-            attendee_email=lead.email,
-        )
-        booked.append("checkin_30day")
-    except Exception as exc:
-        current_app.logger.warning("%s: check-in calendar hold failed for deal=%s: %s", log_prefix, deal.id, exc)
 
-    return booked
+    holds = [
+        (delivery_dt, f"{brand} delivery -- {lead.name}", "delivery"),
+        (checkin_dt, f"{brand} 30-day check-in -- {lead.name}", "checkin_30day"),
+    ]
+    return [
+        label for dt, summary, label in holds
+        if _try_book_hold(deal, dt, summary, lead.email, label)
+    ]
 
 
 def ensure_calendar_holds(deal):
@@ -189,7 +191,7 @@ def trigger_onboarding(deal):
     if roster is not None:
         roster_url = f"{current_app.config['API_BASE_URL']}/roster/{roster.token}"
         html_body = f"""
-        <p>Hi {lead.name.split(" ")[0] if lead.name else "there"},</p>
+        <p>Hi {first_name(lead.name)},</p>
         <p>As the program sponsor, please share your participant roster and
         confirm room/AV requirements so we can prep for delivery day:</p>
         <p><a href="{roster_url}">Submit your roster &amp; room/AV checklist</a></p>
@@ -271,7 +273,7 @@ def _send_reminder_email(deal, lead, days_out):
     brand = current_app.config["BRAND_NAME"]
     plural = "day" if days_out == 1 else "days"
     html_body = f"""
-    <p>Hi {lead.name.split(" ")[0] if lead.name else "there"},</p>
+    <p>Hi {first_name(lead.name)},</p>
     <p>Your {brand} session is {days_out} {plural} away, on
     {deal.delivery_date.strftime("%B %d, %Y")}.</p>
     <p>If you haven't already, please complete your intake form and upload

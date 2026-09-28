@@ -21,7 +21,7 @@ from models import Closer, utcnow
 COMMISSION_TRIGGER_STAGES = ("deposit_paid", "delivered")
 
 
-def sync_commission(deal):
+def sync_commission(deal, commit=True):
     """Sets deal.commission_cents exactly once, and only once the deal has
     actually reached a stage that represents a real close. Never
     speculative: a deal that hasn't reached deposit_paid/delivered yet is
@@ -31,7 +31,9 @@ def sync_commission(deal):
     a commission already earned). No-ops quietly if the deal has no
     closer_id (founder-owned) or the referenced Closer row is missing.
 
-    Commits if it makes a change. Returns the deal either way.
+    Commits if it makes a change, unless `commit=False` (see
+    sync_commissions_for_closer, which batches a closer's deals into one
+    commit instead of one per deal). Returns the deal either way.
     """
     if not deal.closer_id or deal.commission_cents is not None:
         return deal
@@ -43,10 +45,12 @@ def sync_commission(deal):
         return deal
 
     deal.commission_cents = round(deal.amount_cents * closer.commission_rate)
-    db.session.commit()
+    if commit:
+        db.session.commit()
     return deal
 
 
 def sync_commissions_for_closer(closer):
     for deal in closer.deals:
-        sync_commission(deal)
+        sync_commission(deal, commit=False)
+    db.session.commit()

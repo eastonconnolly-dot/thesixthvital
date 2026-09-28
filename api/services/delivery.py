@@ -8,7 +8,6 @@ is the CLI-swept function for the 30-day check-in and day-7 referral ask
 (`flask send-scheduled-followups`, registered in api/app.py).
 """
 
-import secrets
 from datetime import timedelta
 
 from flask import current_app
@@ -16,6 +15,7 @@ from flask import current_app
 from extensions import db
 from models import ConsentRequest, EncounterSession, Lead, ScheduledFollowup, Scorecard, utcnow
 from services import gmail_client, magic_link
+from services.notify_utils import first_name, make_token, unsubscribe_url as _unsubscribe_url
 from services.pdf.scorecard import render_cohort_scorecard_pdf, render_scorecard_pdf
 from shared.rubric import MAX_TOTAL, score_lift
 
@@ -24,11 +24,7 @@ REFERRAL_DELAY_DAYS = 7
 
 
 def _token():
-    return secrets.token_urlsafe(24)
-
-
-def _unsubscribe_url(lead_id):
-    return f"{current_app.config['API_BASE_URL']}/unsubscribe?lead_id={lead_id}"
+    return make_token(24)
 
 
 def complete_session(deal, session_date, session_type, participants):
@@ -112,12 +108,12 @@ def _provision_practice_seat(deal, scorecard):
         return None
 
     brand = current_app.config["BRAND_NAME"]
-    first_name = (scorecard.participant_name or "").split(" ")[0] or scorecard.participant_name
+    fname = first_name(scorecard.participant_name)
     gmail_client.send_email(
         to_email=scorecard.participant_email,
         subject=f"Your {brand} Practice seat is ready",
         html_body=(
-            f"<p>Hi {first_name},</p>"
+            f"<p>Hi {fname},</p>"
             f"<p>Keep sharpening the skills from your session -- your "
             f"{brand} Practice seat is ready (7-day free trial included).</p>"
             f"<p><a href=\"{sign_in_url}\">Sign in to Practice</a></p>"
@@ -140,21 +136,20 @@ def _send_scorecard_email(session, scorecard, lead, mailing_address, brand):
         clip_timestamps=scorecard.clip_timestamps,
         mailing_address=mailing_address,
     )
-    first_name = (scorecard.participant_name or "").split(" ")[0] or scorecard.participant_name
+    fname = first_name(scorecard.participant_name)
     lift = scorecard.lift or {}
     html_body = (
-        f"<p>Hi {first_name},</p>"
+        f"<p>Hi {fname},</p>"
         f"<p>Your {brand} encounter scorecard is attached. Total lift: "
         f"{lift.get('total_lift', 0):+d} points "
         f"({lift.get('baseline_total', 0)} &rarr; {lift.get('final_total', 0)} out of {MAX_TOTAL}).</p>"
         f"<p>Congratulations on the work you put in.</p>"
     )
-    unsubscribe_url = _unsubscribe_url(lead.id) if lead else f"{current_app.config['API_BASE_URL']}/"
     return gmail_client.send_email(
         to_email=scorecard.participant_email,
         subject=f"Your {brand} encounter scorecard",
         html_body=html_body,
-        unsubscribe_url=unsubscribe_url,
+        unsubscribe_url=_unsubscribe_url(lead.id if lead else None),
         attachments=[(f"scorecard-{scorecard.id}.pdf", buf.getvalue(), "application/pdf")],
     )
 
@@ -178,7 +173,7 @@ def _send_cohort_email(deal, session, scorecards, mailing_address, brand, is_pro
         subject = f"{brand} cohort score report"
         note = "<p>Attached: the cohort score report for this session.</p>"
 
-    html_body = f"<p>Hi {lead.name.split(' ')[0] if lead.name else 'there'},</p>{note}"
+    html_body = f"<p>Hi {first_name(lead.name)},</p>{note}"
     return gmail_client.send_email(
         to_email=lead.email,
         subject=subject,
@@ -191,9 +186,9 @@ def _send_cohort_email(deal, session, scorecards, mailing_address, brand, is_pro
 def _create_and_send_consent_requests(scorecard, lead):
     if not scorecard.participant_email:
         return
-    first_name = (scorecard.participant_name or "").split(" ")[0] or scorecard.participant_name
+    fname = first_name(scorecard.participant_name)
     brand = current_app.config["BRAND_NAME"]
-    unsubscribe_url = _unsubscribe_url(lead.id) if lead else f"{current_app.config['API_BASE_URL']}/"
+    unsub_url = _unsubscribe_url(lead.id if lead else None)
 
     asks = (
         ("testimonial", f"Would you share a testimonial for {brand}?",
@@ -215,8 +210,8 @@ def _create_and_send_consent_requests(scorecard, lead):
         gmail_client.send_email(
             to_email=scorecard.participant_email,
             subject=subject,
-            html_body=f"<p>Hi {first_name},</p><p>{ask}</p><p><a href=\"{respond_url}\">Respond here</a></p>",
-            unsubscribe_url=unsubscribe_url,
+            html_body=f"<p>Hi {fname},</p><p>{ask}</p><p><a href=\"{respond_url}\">Respond here</a></p>",
+            unsubscribe_url=unsub_url,
         )
 
 
@@ -269,9 +264,9 @@ def send_scheduled_followups(now=None):
 
 def _send_checkin_confirmation(lead):
     brand = current_app.config["BRAND_NAME"]
-    first_name = (lead.name or "").split(" ")[0] or lead.name
+    fname = first_name(lead.name)
     html_body = (
-        f"<p>Hi {first_name},</p>"
+        f"<p>Hi {fname},</p>"
         f"<p>It's been 30 days since your {brand} session -- your check-in "
         f"is confirmed. We'll be in touch to schedule it if we haven't "
         f"already connected.</p>"
@@ -284,10 +279,10 @@ def _send_checkin_confirmation(lead):
 
 def _send_referral_ask(lead):
     brand = current_app.config["BRAND_NAME"]
-    first_name = (lead.name or "").split(" ")[0] or lead.name
+    fname = first_name(lead.name)
     referral_url = f"{current_app.config['API_BASE_URL']}/refer/{lead.id}"
     html_body = (
-        f"<p>Hi {first_name},</p>"
+        f"<p>Hi {fname},</p>"
         f"<p>If {brand} was useful, we'd be grateful for a referral. Share "
         f"your link with a colleague:</p>"
         f"<p><a href=\"{referral_url}\">{referral_url}</a></p>"
