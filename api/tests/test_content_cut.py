@@ -108,3 +108,39 @@ def test_run_ffmpeg_raises_clear_error_when_binary_missing():
     except cut.CutError as e:
         assert "ffmpeg" in str(e).lower()
         assert "PATH" in str(e)
+
+
+# ── _drawtext_filter (caption wrapping/escaping) ──────────────────────────
+#
+# Regression coverage for a real bug found via a live render: ffmpeg's
+# filtergraph string parser (which parses the whole -vf argument before
+# drawtext's own text= parser ever runs) treats a bare "\n" (backslash +
+# the letter n) as an escaped literal "n", not a newline -- so a long
+# caption rendered as one unwrapped line that ran off both edges of the
+# frame, and the first fix attempt (joining with "\\n") rendered a stray
+# literal "n" into the caption instead of breaking the line. The real fix
+# joins wrapped lines with a backslash followed by an ACTUAL newline byte.
+
+def test_drawtext_filter_wraps_long_captions_into_multiple_lines():
+    long_caption = "Here's a mistake I see doctors make constantly — jumping straight to reassurance."
+    result = cut._drawtext_filter(long_caption)
+    # A real newline byte (escaped for the filtergraph parser with a
+    # preceding backslash) must be present, not the two characters "\" + "n".
+    assert "\\\n" in result
+    assert "\\n" not in result.replace("\\\n", "")
+    for line in result.split("\\\n"):
+        # strip the drawtext=text=' prefix / trailing filter options from the first/last segment
+        visible = line.split("text='")[-1].split("':font")[0]
+        assert len(visible) <= cut.CAPTION_WRAP_CHARS + 5  # small slack for word-boundary overflow
+
+
+def test_drawtext_filter_leaves_short_captions_on_one_line():
+    result = cut._drawtext_filter("Read the room.")
+    assert "\\\n" not in result
+    assert "Read the room." in result
+
+
+def test_drawtext_filter_escapes_special_characters_per_line():
+    result = cut._drawtext_filter("Timing: 3:00 and 100% ready")
+    assert "\\:" in result  # colon escaped for the filtergraph parser
+    assert "\\%" in result  # percent escaped

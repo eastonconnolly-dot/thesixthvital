@@ -25,6 +25,7 @@ import os
 import shutil
 import subprocess
 import sys
+import textwrap
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # so `import util` resolves however this is imported
 
@@ -39,6 +40,13 @@ from models import Asset, ContentItem  # noqa: E402
 
 FFMPEG_BIN = "ffmpeg"
 MAX_CAPTION_CHARS = 140
+# Both crop targets scale to 1080px wide (see CROPS below). At fontsize=54,
+# an unwrapped caption overflows the frame the moment it's much longer than
+# a short phrase -- discovered live (a real ~83-char hook rendered as a
+# single line ran off both edges). ~27px/char average for a proportional
+# sans face at this size, so 28 chars/line stays safely inside 1080px with
+# the box's own padding.
+CAPTION_WRAP_CHARS = 28
 
 INK = "0x17263B"
 IVORY = "0xF4EFE6"
@@ -99,9 +107,20 @@ def _font_clause():
 
 
 def _drawtext_filter(caption_text):
-    safe = _escape_drawtext(caption_text[:MAX_CAPTION_CHARS])
+    truncated = (caption_text or "")[:MAX_CAPTION_CHARS]
+    lines = textwrap.wrap(truncated, width=CAPTION_WRAP_CHARS) or [""]
+    # Join with backslash + an ACTUAL newline byte, not the two characters
+    # "\" + "n". Verified live against a real render: ffmpeg's filtergraph
+    # string parser (which parses the whole -vf argument before drawtext
+    # ever sees the text= value) treats a bare backslash-n as "escaped
+    # literal n" -- it renders a literal "n" in the caption and swallows the
+    # backslash, not a line break. Escaping a real newline byte is what the
+    # filtergraph parser actually passes through as a newline. subprocess.run
+    # passes args with no shell involved, so this newline byte reaches
+    # ffmpeg's own argv unchanged either way.
+    wrapped = "\\\n".join(_escape_drawtext(line) for line in lines)
     return (
-        f"drawtext=text='{safe}':{_font_clause()}:fontsize=54:fontcolor={IVORY}:"
+        f"drawtext=text='{wrapped}':{_font_clause()}:fontsize=54:fontcolor={IVORY}:"
         f"box=1:boxcolor={INK}@0.75:boxborderw=18:x=(w-text_w)/2:y=h-th-120:line_spacing=6"
     )
 

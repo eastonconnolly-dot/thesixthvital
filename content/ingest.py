@@ -134,13 +134,19 @@ def _format_transcript(segments):
 
 # ── Claude: transcript -> content plan ──────────────────────────────────
 
+
+# Claude's structured-output schema validator only supports array minItems/
+# maxItems values of 0 or 1 (discovered live: "For 'array' type, 'minItems'
+# values other than 0 or 1 are not supported") -- same family of restriction
+# as services/patient_sim.py's integer minimum/maximum and null-in-enum
+# limits. The exact counts below are requested in the prompt text instead
+# and enforced in Python after parsing (see _clamp_plan_counts()) rather
+# than relying on the schema to guarantee them.
 CONTENT_PLAN_SCHEMA = {
     "type": "object",
     "properties": {
         "clips": {
             "type": "array",
-            "minItems": 5,
-            "maxItems": 7,
             "items": {
                 "type": "object",
                 "properties": {
@@ -156,8 +162,6 @@ CONTENT_PLAN_SCHEMA = {
         },
         "linkedin_posts": {
             "type": "array",
-            "minItems": 5,
-            "maxItems": 5,
             "items": {
                 "type": "object",
                 "properties": {
@@ -177,8 +181,8 @@ CONTENT_PLAN_SCHEMA = {
             "required": ["subject", "body"],
             "additionalProperties": False,
         },
-        "captions": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "string"}},
-        "proof_snippets": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "string"}},
+        "captions": {"type": "array", "items": {"type": "string"}},
+        "proof_snippets": {"type": "array", "items": {"type": "string"}},
     },
     "required": ["clips", "linkedin_posts", "newsletter", "captions", "proof_snippets"],
     "additionalProperties": False,
@@ -212,7 +216,19 @@ def _plan_content(transcript_text, apply_url):
         output_config={"format": {"type": "json_schema", "schema": CONTENT_PLAN_SCHEMA}},
     )
     text = next(b.text for b in resp.content if b.type == "text")
-    return json.loads(text)
+    return _clamp_plan_counts(json.loads(text))
+
+
+def _clamp_plan_counts(plan):
+    """The real enforcement of clips=5-7 / posts=5 / captions=3 / proof_snippets=2
+    now that the schema itself can't guarantee it (see CONTENT_PLAN_SCHEMA's
+    comment). Truncates any list that came back too long; a too-short list is
+    left as-is (better to publish 4 good LinkedIn posts than fabricate a 5th)."""
+    plan["clips"] = plan.get("clips", [])[:7]
+    plan["linkedin_posts"] = plan.get("linkedin_posts", [])[:5]
+    plan["captions"] = plan.get("captions", [])[:3]
+    plan["proof_snippets"] = plan.get("proof_snippets", [])[:2]
+    return plan
 
 
 # ── persistence ──────────────────────────────────────────────────────────

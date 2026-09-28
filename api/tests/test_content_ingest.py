@@ -178,3 +178,34 @@ def test_transcribe_raises_clear_error_without_local_whisper():
         assert False, "expected IngestError"
     except ingest.IngestError as e:
         assert "Whisper" in str(e) or "whisper" in str(e)
+
+
+# ── _clamp_plan_counts (the real enforcement now that Claude's structured-
+# output schema can't express minItems/maxItems other than 0/1) ──────────
+
+def test_clamp_plan_counts_truncates_oversized_lists():
+    plan = {
+        "clips": [{"title": f"c{i}"} for i in range(10)],
+        "linkedin_posts": [{"weekday": "Monday", "body": f"p{i}"} for i in range(8)],
+        "captions": [f"cap{i}" for i in range(6)],
+        "proof_snippets": [f"snip{i}" for i in range(5)],
+    }
+    clamped = ingest._clamp_plan_counts(plan)
+    assert len(clamped["clips"]) == 7
+    assert len(clamped["linkedin_posts"]) == 5
+    assert len(clamped["captions"]) == 3
+    assert len(clamped["proof_snippets"]) == 2
+
+
+def test_clamp_plan_counts_leaves_undersized_lists_alone():
+    plan = {
+        "clips": [{"title": "only one"}],
+        "linkedin_posts": [],
+        "captions": ["one caption"],
+        "proof_snippets": [],
+    }
+    clamped = ingest._clamp_plan_counts(plan)
+    assert len(clamped["clips"]) == 1
+    assert len(clamped["linkedin_posts"]) == 0
+    assert len(clamped["captions"]) == 1
+    assert len(clamped["proof_snippets"]) == 0
