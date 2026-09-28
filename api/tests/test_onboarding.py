@@ -98,6 +98,55 @@ def test_trigger_onboarding_survives_calendar_failure(app):
         assert deal.onboarding_triggered_at is not None
 
 
+def test_ensure_calendar_holds_books_retroactively_once_delivery_date_is_set(app):
+    """The bug this guards against: trigger_onboarding() is one-shot, so a
+    deal onboarded before its delivery_date was known (a call-to-proposal
+    extraction with no date in the transcript, or a self-serve package
+    checkout with no discovery call at all) would otherwise skip calendar
+    holds forever -- there's no second trigger_onboarding() call to retry
+    them. ensure_calendar_holds() is the retry path (wired into
+    routes/admin.py's set_delivery_date)."""
+    with app.app_context():
+        deal = _make_deal(app, delivery_date=None)
+        with patch("services.onboarding.gmail_client.send_email", return_value={"message_id": "m1", "thread_id": "t1"}), \
+             patch("services.onboarding.calendar_client.book_slot") as mock_book, \
+             patch("services.onboarding.submit_badge_print_order"):
+            result = onboarding.trigger_onboarding(deal)
+
+        assert result["calendar_holds"] == []
+        mock_book.assert_not_called()
+        deal = db.session.get(Deal, deal.id)
+        assert deal.calendar_holds_booked_at is None
+
+        deal.delivery_date = date(2026, 11, 15)
+        db.session.commit()
+
+        with patch("services.onboarding.calendar_client.book_slot") as mock_book2:
+            booked = onboarding.ensure_calendar_holds(deal)
+
+        assert booked == ["delivery", "checkin_30day"]
+        assert mock_book2.call_count == 2
+        deal = db.session.get(Deal, deal.id)
+        assert deal.calendar_holds_booked_at is not None
+
+
+def test_ensure_calendar_holds_is_idempotent(app):
+    with app.app_context():
+        deal = _make_deal(app, delivery_date=date(2026, 11, 15))
+        with patch("services.onboarding.gmail_client.send_email", return_value={"message_id": "m1", "thread_id": "t1"}), \
+             patch("services.onboarding.calendar_client.book_slot") as mock_book, \
+             patch("services.onboarding.submit_badge_print_order"):
+            onboarding.trigger_onboarding(deal)
+
+        assert mock_book.call_count == 2
+
+        with patch("services.onboarding.calendar_client.book_slot") as mock_book2:
+            again = onboarding.ensure_calendar_holds(deal)
+
+        assert again == []
+        mock_book2.assert_not_called()
+
+
 def test_trigger_onboarding_program_track_creates_cohort_roster(app):
     with app.app_context():
         deal = _make_deal(app, track="program", package="program_cohort_1day")

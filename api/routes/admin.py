@@ -8,6 +8,7 @@ from flask import (
 from extensions import db
 from models import PACKAGES, Deal, Lead
 from services import esign, hub_sync, stripe_client
+from services.onboarding import ensure_calendar_holds
 from services.pdf.proposal import render_proposal_pdf
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -84,6 +85,39 @@ def deal_detail(deal_id):
     deal = Deal.query.get_or_404(deal_id)
     package_label = PACKAGES.get(deal.package, {}).get("label", deal.package)
     return render_template("admin/deal_detail.html", deal=deal, lead=deal.lead, package_label=package_label)
+
+
+@bp.post("/deals/<int:deal_id>/delivery-date")
+@admin_required
+def set_delivery_date(deal_id):
+    """Sets or corrects a deal's delivery_date after it was created --
+    covers a call-to-proposal extraction that didn't find a date in the
+    transcript, and self-serve package checkouts (routes/webhooks.py's
+    _handle_package_checkout), which have no discovery call at all and so
+    never get a delivery_date automatically. If onboarding already ran
+    (routes/esign.py, or the package-checkout path), the calendar holds it
+    would have booked were skipped at the time for lack of a date --
+    ensure_calendar_holds() books them now instead of leaving them skipped
+    forever."""
+    deal = Deal.query.get_or_404(deal_id)
+    raw = request.form.get("delivery_date") or None
+    if not raw:
+        flash("A delivery date is required.", "error")
+        return redirect(url_for("admin.deal_detail", deal_id=deal.id))
+
+    try:
+        deal.delivery_date = datetime.strptime(raw, "%Y-%m-%d").date()
+    except ValueError:
+        flash("Delivery date must be YYYY-MM-DD.", "error")
+        return redirect(url_for("admin.deal_detail", deal_id=deal.id))
+
+    db.session.commit()
+    booked = ensure_calendar_holds(deal)
+    if booked:
+        flash(f"Delivery date saved and calendar holds booked ({', '.join(booked)}).", "success")
+    else:
+        flash("Delivery date saved.", "success")
+    return redirect(url_for("admin.deal_detail", deal_id=deal.id))
 
 
 @bp.post("/deals/<int:deal_id>/proposal")

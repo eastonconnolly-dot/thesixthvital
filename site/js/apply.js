@@ -27,9 +27,9 @@
       .then(function (result) {
         form.reset();
         form.hidden = true;
-        if (result.qualified && result.lead_id) {
+        if (result.qualified && result.qualifier_token) {
           showMsg("You're a fit — taking you to a quick two-minute chat to get you booked…", "ok");
-          window.location.href = window.RPSAS_CONFIG.apiBase + "/qualify/" + result.lead_id;
+          window.location.href = window.RPSAS_CONFIG.apiBase + "/qualify/" + result.qualifier_token;
           return;
         }
         showMsg(

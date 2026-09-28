@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from flask import Blueprint, current_app, jsonify, request
 
 from extensions import db
-from models import PACKAGES, Deal, Lead, PracticeUser
+from models import PACKAGES, Deal, Lead, PracticeUser, ProcessedWebhookEvent
 from services import stripe_client
 
 bp = Blueprint("webhooks", __name__)
@@ -19,6 +19,17 @@ def stripe_webhook():
     except Exception as e:
         current_app.logger.warning(f"Stripe webhook signature verification failed: {e}")
         return jsonify({"error": "invalid signature"}), 400
+
+    # Stripe's delivery guarantee is at-least-once -- a retried delivery of an
+    # event we already handled must not re-run it (most importantly,
+    # _handle_package_checkout must not create a second Deal for the same
+    # payment). Skip dispatch entirely for an event id we've already recorded.
+    event_id = event.get("id")
+    if event_id:
+        if db.session.get(ProcessedWebhookEvent, event_id):
+            return jsonify({"received": True, "duplicate": True})
+        db.session.add(ProcessedWebhookEvent(id=event_id))
+        db.session.commit()
 
     event_type = event["type"]
     obj = event["data"]["object"]
@@ -41,7 +52,11 @@ def stripe_webhook():
 def _handle_deal_checkout(metadata, session):
     deal_id = metadata.get("deal_id")
     kind = metadata.get("kind")
-    deal = db.session.get(Deal, int(deal_id)) if deal_id else None
+    try:
+        deal = db.session.get(Deal, int(deal_id)) if deal_id else None
+    except (TypeError, ValueError):
+        current_app.logger.warning(f"deal checkout webhook: non-integer deal_id in metadata: {deal_id!r}")
+        return
 
     if deal and kind == "deposit":
         deal.deposit_paid = True
@@ -68,7 +83,11 @@ def _handle_package_checkout(metadata, session):
     Full price, paid up front -- no deposit/balance split, no founder call."""
     lead_id = metadata.get("lead_id")
     package_key = metadata.get("package")
-    lead = db.session.get(Lead, int(lead_id)) if lead_id else None
+    try:
+        lead = db.session.get(Lead, int(lead_id)) if lead_id else None
+    except (TypeError, ValueError):
+        current_app.logger.warning(f"package checkout webhook: non-integer lead_id in metadata: {lead_id!r}")
+        return
     package = PACKAGES.get(package_key)
     if not lead or not package:
         return
@@ -81,6 +100,12 @@ def _handle_package_checkout(metadata, session):
     db.session.add(deal)
     lead.status = "customer"
     db.session.commit()
+
+    try:
+        from services.closers import sync_commission
+        sync_commission(deal)
+    except Exception as e:
+        current_app.logger.warning(f"commission sync failed for self-serve deal {deal.id}: {e}")
 
     try:
         from services.onboarding import trigger_onboarding

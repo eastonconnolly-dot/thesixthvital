@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 from extensions import db
-from models import Closer, Deal, Lead
+from models import Closer, Deal, Lead, ProcessedWebhookEvent
 
 
 def _make_deal(app):
@@ -166,6 +166,97 @@ def test_stripe_webhook_package_checkout_survives_onboarding_failure(app, client
     assert resp.status_code == 200
     with app.app_context():
         assert Deal.query.filter_by(lead_id=lead_id).first() is not None
+
+
+def test_stripe_webhook_package_checkout_calls_sync_commission(app, client):
+    # sync_commission itself no-ops without a closer_id (see
+    # test_stripe_webhook_package_checkout_creates_paid_deal for the
+    # no-closer case) -- this test only asserts the webhook handler wires
+    # sync_commission into the package-checkout path at all, the same gap
+    # the code review flagged for _handle_deal_checkout's deposit path.
+    with app.app_context():
+        lead = Lead(name="Priya Nair", email="priya2@example.com", track="applicant")
+        db.session.add(lead)
+        db.session.commit()
+        lead_id = lead.id
+
+    fake_event = {
+        "type": "checkout.session.completed",
+        "data": {"object": {"metadata": {"lead_id": str(lead_id), "package": "rpsas_taste", "kind": "package"}}},
+    }
+    with patch("routes.webhooks.stripe_client.verify_and_parse_webhook", return_value=fake_event), \
+         patch("services.closers.sync_commission") as mock_sync, \
+         patch("services.onboarding.trigger_onboarding"):
+        resp = client.post("/webhooks/stripe", data=b"{}", headers={"Stripe-Signature": "t=1,v1=fake"})
+
+    assert resp.status_code == 200
+    mock_sync.assert_called_once()
+
+
+def test_stripe_webhook_package_checkout_survives_commission_sync_failure(app, client):
+    with app.app_context():
+        lead = Lead(name="Priya Nair", email="priya3@example.com", track="applicant")
+        db.session.add(lead)
+        db.session.commit()
+        lead_id = lead.id
+
+    fake_event = {
+        "type": "checkout.session.completed",
+        "data": {"object": {"metadata": {"lead_id": str(lead_id), "package": "rpsas_taste", "kind": "package"}}},
+    }
+    with patch("routes.webhooks.stripe_client.verify_and_parse_webhook", return_value=fake_event), \
+         patch("services.closers.sync_commission", side_effect=RuntimeError("boom")):
+        resp = client.post("/webhooks/stripe", data=b"{}", headers={"Stripe-Signature": "t=1,v1=fake"})
+
+    assert resp.status_code == 200
+    with app.app_context():
+        assert Deal.query.filter_by(lead_id=lead_id).first() is not None
+
+
+def test_stripe_webhook_malformed_deal_id_does_not_500(app, client):
+    fake_event = {
+        "type": "checkout.session.completed",
+        "data": {"object": {"metadata": {"deal_id": "not-an-int", "kind": "deposit"}}},
+    }
+    with patch("routes.webhooks.stripe_client.verify_and_parse_webhook", return_value=fake_event):
+        resp = client.post("/webhooks/stripe", data=b"{}", headers={"Stripe-Signature": "t=1,v1=fake"})
+    assert resp.status_code == 200
+
+
+def test_stripe_webhook_malformed_lead_id_does_not_500(app, client):
+    fake_event = {
+        "type": "checkout.session.completed",
+        "data": {"object": {"metadata": {"lead_id": "not-an-int", "package": "rpsas_taste", "kind": "package"}}},
+    }
+    with patch("routes.webhooks.stripe_client.verify_and_parse_webhook", return_value=fake_event):
+        resp = client.post("/webhooks/stripe", data=b"{}", headers={"Stripe-Signature": "t=1,v1=fake"})
+    assert resp.status_code == 200
+
+
+def test_stripe_webhook_is_idempotent_on_redelivered_event_id(app, client):
+    with app.app_context():
+        lead = Lead(name="Priya Nair", email="priya4@example.com", track="applicant")
+        db.session.add(lead)
+        db.session.commit()
+        lead_id = lead.id
+
+    fake_event = {
+        "id": "evt_test_redelivered",
+        "type": "checkout.session.completed",
+        "data": {"object": {"metadata": {"lead_id": str(lead_id), "package": "rpsas_taste", "kind": "package"}}},
+    }
+    with patch("routes.webhooks.stripe_client.verify_and_parse_webhook", return_value=fake_event), \
+         patch("services.onboarding.trigger_onboarding"):
+        first = client.post("/webhooks/stripe", data=b"{}", headers={"Stripe-Signature": "t=1,v1=fake"})
+        second = client.post("/webhooks/stripe", data=b"{}", headers={"Stripe-Signature": "t=1,v1=fake"})
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert second.get_json().get("duplicate") is True
+
+    with app.app_context():
+        assert Deal.query.filter_by(lead_id=lead_id).count() == 1
+        assert db.session.get(ProcessedWebhookEvent, "evt_test_redelivered") is not None
 
 
 def test_stripe_webhook_package_checkout_ignores_unknown_package(app, client):

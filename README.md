@@ -17,7 +17,7 @@ Outreach, Content engine, Practice (the AI training platform — verified live
 against a real Anthropic key, not just mocked tests), Ops, and Phase 6
 (founder off the loop: pre-call qualifier, call-to-proposal, onboarding,
 post-delivery automation, content-on-inventory alerting, sales handoff
-readiness) are all built, integrated, and tested — 290 tests,
+readiness) are all built, integrated, and tested — 305 tests,
 `cd api && source .venv/bin/activate && python -m pytest`. See each phase's
 section below and each module's own `INTEGRATION.md` (`content/`, `ops/`,
 `outreach/`, `api/`) for exact status,

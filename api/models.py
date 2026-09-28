@@ -34,6 +34,12 @@ class Lead(db.Model):
 
     hub_customer_id = db.Column(db.Integer)  # set once services/hub_sync.py has pushed this lead into the Hub
 
+    # Unguessable public identifier for the pre-call qualifier flow (routes/qualifier.py).
+    # Set once, when a lead first qualifies — every qualifier route resolves the lead by
+    # this token instead of the sequential `id`, so the chat/booking flow can't be hijacked
+    # by walking lead ids (see api/routes/qualifier.py for the routes this gates).
+    qualifier_token = db.Column(db.String(64), unique=True, index=True)
+
     applications = db.relationship("Application", backref="lead", lazy=True)
     deals = db.relationship("Deal", backref="lead", lazy=True)
     enrollments = db.relationship("SequenceEnrollment", backref="lead", lazy=True)
@@ -125,6 +131,14 @@ class Deal(db.Model):
 
     # ── Phase 6: onboarding automation (services/onboarding.py) ──────────
     onboarding_triggered_at = db.Column(db.DateTime(timezone=True))  # idempotency guard for trigger_onboarding()
+    # Separate idempotency guard, deliberately decoupled from onboarding_triggered_at:
+    # a deal can reach trigger_onboarding() with delivery_date still unknown (a call
+    # transcript that didn't state one, or a self-serve package checkout with no
+    # discovery call at all) — trigger_onboarding only runs once, so without a
+    # separate flag, calendar holds set to None at that moment would be skipped
+    # forever even after someone fills in delivery_date later. See
+    # services.onboarding.ensure_calendar_holds().
+    calendar_holds_booked_at = db.Column(db.DateTime(timezone=True))
     reminder_7d_sent = db.Column(db.Boolean, nullable=False, default=False)
     reminder_3d_sent = db.Column(db.Boolean, nullable=False, default=False)
     reminder_1d_sent = db.Column(db.Boolean, nullable=False, default=False)
@@ -613,3 +627,15 @@ class Closer(db.Model):
     created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
 
     deals = db.relationship("Deal", backref="closer", lazy=True)
+
+
+class ProcessedWebhookEvent(db.Model):
+    """Idempotency guard for routes/webhooks.py's Stripe handler. Stripe's
+    delivery guarantee is at-least-once -- a network blip or a slow response
+    on our end makes Stripe retry the same event, and without this, a
+    replayed checkout.session.completed would create a second Deal (or
+    double-run whatever else that event triggers)."""
+    __tablename__ = "processed_webhook_events"
+
+    id = db.Column(db.String(255), primary_key=True)  # the provider's event id, e.g. Stripe's evt_...
+    processed_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)

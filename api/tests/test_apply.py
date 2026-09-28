@@ -13,10 +13,12 @@ def test_apply_creates_lead_and_qualified_application(app, client):
     assert resp.status_code == 201
     data = resp.get_json()
     assert data["qualified"] is True
+    assert data["qualifier_token"]
 
     with app.app_context():
         lead = Lead.query.get(data["lead_id"])
         assert lead.status == "qualified"
+        assert lead.qualifier_token == data["qualifier_token"]
         application = Application.query.get(data["application_id"])
         assert application.qualified is True
 
@@ -31,8 +33,11 @@ def test_apply_routes_unqualified_to_nurture(app, client):
     assert resp.status_code == 201
     data = resp.get_json()
     assert data["qualified"] is False
+    assert data["qualifier_token"] is None
     with app.app_context():
-        assert Lead.query.get(data["lead_id"]).status == "nurture"
+        lead = Lead.query.get(data["lead_id"])
+        assert lead.status == "nurture"
+        assert lead.qualifier_token is None
 
 
 def test_apply_requires_name_email_track(client):

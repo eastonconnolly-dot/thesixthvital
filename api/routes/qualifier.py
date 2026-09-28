@@ -2,17 +2,28 @@
 step between a qualified application and a founder call. See
 api/INTEGRATION.md for the one-line registration this needs in
 api/app.py (not edited here — another engineer is actively working in/
-around that file)."""
+around that file).
+
+Every route below is keyed by `Lead.qualifier_token` (an unguessable
+secrets.token_urlsafe value minted in routes/public.py's /apply, once a
+lead qualifies) rather than the sequential `Lead.id` — the same pattern
+esign.py/magic_link.py use for public, lead-facing links. Without this, the
+integer lead_id in the URL would let anyone walk ids and hijack any other
+lead's qualifier chat and calendar booking."""
 
 from datetime import datetime, timezone
 
 from flask import Blueprint, current_app, jsonify, render_template, request
 
 from extensions import db
-from models import Deal, Lead, QualifierSession
+from models import PACKAGES, Deal, Lead, QualifierSession
 from services import calendar_client, qualifier_chat, stripe_client
 
 bp = Blueprint("qualifier", __name__, url_prefix="/qualify")
+
+
+def _lead_or_404(token):
+    return Lead.query.filter_by(qualifier_token=token).first_or_404()
 
 
 def _latest_session(lead_id, status=None):
@@ -30,15 +41,16 @@ def _fit_confirmed(lead_id):
     return bool(session and session.budget_fit is True), session
 
 
-@bp.get("/<int:lead_id>")
-def chat_page(lead_id):
-    lead = Lead.query.get_or_404(lead_id)
+@bp.get("/<token>")
+def chat_page(token):
+    lead = _lead_or_404(token)
     return render_template("qualifier/chat.html", lead=lead)
 
 
-@bp.post("/<int:lead_id>/start")
-def start(lead_id):
-    lead = Lead.query.get_or_404(lead_id)
+@bp.post("/<token>/start")
+def start(token):
+    lead = _lead_or_404(token)
+    lead_id = lead.id
 
     existing = _latest_session(lead_id, status="in_progress")
     if existing:
@@ -56,10 +68,10 @@ def start(lead_id):
     return jsonify({"session_id": session.id, "question": opening}), 201
 
 
-@bp.post("/<int:lead_id>/turn")
-def turn(lead_id):
-    lead = Lead.query.get_or_404(lead_id)
-    session = _latest_session(lead_id, status="in_progress")
+@bp.post("/<token>/turn")
+def turn(token):
+    lead = _lead_or_404(token)
+    session = _latest_session(lead.id, status="in_progress")
     if not session:
         return jsonify({"error": "no in-progress qualifier session — call /start first"}), 404
 
@@ -80,10 +92,10 @@ def turn(lead_id):
     return jsonify({"reply": reply})
 
 
-@bp.post("/<int:lead_id>/complete")
-def complete(lead_id):
-    lead = Lead.query.get_or_404(lead_id)
-    session = _latest_session(lead_id, status="in_progress")
+@bp.post("/<token>/complete")
+def complete(token):
+    lead = _lead_or_404(token)
+    session = _latest_session(lead.id, status="in_progress")
     if not session:
         return jsonify({"error": "no in-progress qualifier session — call /start first"}), 404
 
@@ -122,6 +134,13 @@ def complete(lead_id):
     db.session.commit()
 
     package_key = session.recommended_package
+    if package_key not in PACKAGES:
+        current_app.logger.error(
+            "qualifier: complete_qualifier returned an unknown recommended_package %r for lead %s",
+            package_key, lead.id,
+        )
+        return jsonify({"error": "could not determine a recommended package — we'll follow up by email"}), 502
+
     success_url = f"{current_app.config['SITE_BASE_URL']}/apply.html?checkout=paid"
     cancel_url = f"{current_app.config['SITE_BASE_URL']}/apply.html?checkout=cancelled"
     checkout = stripe_client.create_package_checkout_session(package_key, lead, success_url, cancel_url)
@@ -133,10 +152,10 @@ def complete(lead_id):
     })
 
 
-@bp.get("/<int:lead_id>/slots")
-def slots(lead_id):
-    Lead.query.get_or_404(lead_id)
-    fit, _ = _fit_confirmed(lead_id)
+@bp.get("/<token>/slots")
+def slots(token):
+    lead = _lead_or_404(token)
+    fit, _ = _fit_confirmed(lead.id)
     if not fit:
         # The founder never takes a call under $10k -- no booking path for
         # anyone who hasn't cleared the qualifier with a True verdict.
@@ -145,18 +164,23 @@ def slots(lead_id):
     try:
         available = calendar_client.available_slots()
     except Exception as exc:
-        current_app.logger.warning("qualifier: failed to fetch slots for lead %s: %s", lead_id, exc)
+        current_app.logger.warning("qualifier: failed to fetch slots for lead %s: %s", lead.id, exc)
         return jsonify({"error": "could not load available times — check Google Calendar credentials"}), 502
 
     return jsonify({"slots": [s.isoformat() for s in available]})
 
 
-@bp.post("/<int:lead_id>/book")
-def book(lead_id):
-    lead = Lead.query.get_or_404(lead_id)
-    fit, _ = _fit_confirmed(lead_id)
+@bp.post("/<token>/book")
+def book(token):
+    lead = _lead_or_404(token)
+    fit, _ = _fit_confirmed(lead.id)
     if not fit:
         return jsonify({"error": "not eligible to book a call"}), 403
+    if lead.status == "booked":
+        # Guards against a double-submit (double click, retried fetch) placing
+        # two calendar holds for the same lead — book() has no other
+        # idempotency key to dedupe on.
+        return jsonify({"error": "a call is already booked for this lead"}), 409
 
     data = request.get_json(silent=True) or {}
     slot_start_raw = data.get("slot_start")

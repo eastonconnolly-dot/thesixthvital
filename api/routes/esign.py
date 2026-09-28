@@ -18,6 +18,22 @@ def _get_request_or_404(token):
     return sig_request
 
 
+def _client_ip():
+    """Best-effort real client IP for the signature audit trail. A bare
+    `request.headers.get("X-Forwarded-For", ...)` is attacker-controlled --
+    anyone can send their own X-Forwarded-For header, so trusting it
+    verbatim would let a signer forge the IP recorded against their legal
+    signature. Render (this app's deploy target -- see render.yaml) sits
+    directly in front of the app as the sole proxy hop, and the
+    X-Forwarded-For convention has each proxy APPEND the address it saw --
+    so the real connecting IP is always the rightmost entry, while anything
+    before it is client-supplied and untrusted."""
+    xff = request.headers.get("X-Forwarded-For", "")
+    if xff:
+        return xff.split(",")[-1].strip()
+    return request.remote_addr
+
+
 @bp.get("/sign/<token>")
 def sign_page(token):
     sig_request = _get_request_or_404(token)
@@ -67,8 +83,7 @@ def submit_signature(token):
     if not png_bytes.startswith(b"\x89PNG"):
         return jsonify({"error": "signature must be a PNG image"}), 400
 
-    ip = request.headers.get("X-Forwarded-For", request.remote_addr)
-    esign.record_signature(sig_request, typed_name, png_bytes, ip)
+    esign.record_signature(sig_request, typed_name, png_bytes, _client_ip())
 
     deal = sig_request.deal
     context = deal.proposal_context or {}

@@ -1,3 +1,4 @@
+import secrets
 from datetime import date
 
 from flask import Blueprint, jsonify, request, send_file, current_app
@@ -49,6 +50,8 @@ def apply():
     db.session.add(application)
 
     lead.status = "qualified" if qualified else "nurture"
+    if qualified:
+        lead.qualifier_token = secrets.token_urlsafe(32)
     db.session.commit()
 
     # Booking-link / nurture email sends happen from the outreach engine (Phase 2)
@@ -59,6 +62,7 @@ def apply():
         "lead_id": lead.id,
         "application_id": application.id,
         "qualified": qualified,
+        "qualifier_token": lead.qualifier_token,
     }), 201
 
 

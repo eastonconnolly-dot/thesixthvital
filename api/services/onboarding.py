@@ -87,8 +87,6 @@ def _book_calendar_holds(deal, lead):
     onboarding (mirrors services/hub_sync.py's "never let an external call
     block the caller" pattern). Returns the list of holds actually booked."""
     booked = []
-    if not deal.delivery_date:
-        return booked
 
     delivery_dt = _delivery_datetime(deal)
     try:
@@ -110,6 +108,31 @@ def _book_calendar_holds(deal, lead):
     except Exception as exc:
         current_app.logger.warning("%s: check-in calendar hold failed for deal=%s: %s", log_prefix, deal.id, exc)
 
+    return booked
+
+
+def ensure_calendar_holds(deal):
+    """Books the delivery + 30-day-check-in calendar holds for `deal` if
+    they haven't been booked yet and `deal.delivery_date` is now known.
+
+    Split out from trigger_onboarding() (and idempotent on its own
+    `calendar_holds_booked_at`, not `onboarding_triggered_at`) because
+    onboarding is one-shot: a deal can reach trigger_onboarding() before its
+    delivery_date is known (a call transcript that didn't state one, or a
+    self-serve package checkout with no discovery call at all). Without this
+    split, calendar holds would be skipped at trigger_onboarding() time and
+    then skipped forever, even after delivery_date is filled in later --
+    trigger_onboarding() never runs a second time to retry them. Call this
+    again any time delivery_date is set or corrected on an already-onboarded
+    deal (see routes/admin.py's set_delivery_date)."""
+    if deal.calendar_holds_booked_at is not None:
+        return []
+    if not deal.delivery_date:
+        return []
+
+    booked = _book_calendar_holds(deal, deal.lead)
+    deal.calendar_holds_booked_at = utcnow()
+    db.session.commit()
     return booked
 
 
@@ -161,7 +184,6 @@ def trigger_onboarding(deal):
     result["welcome_email_sent"] = True
     result["intake_form_created"] = True
 
-    result["calendar_holds"] = _book_calendar_holds(deal, lead)
     result["badge_order_submitted"] = _submit_badge_order(deal, [p["name"] for p in participants])
 
     if roster is not None:
@@ -181,6 +203,8 @@ def trigger_onboarding(deal):
 
     deal.onboarding_triggered_at = utcnow()
     db.session.commit()
+
+    result["calendar_holds"] = ensure_calendar_holds(deal)
     return result
 
 

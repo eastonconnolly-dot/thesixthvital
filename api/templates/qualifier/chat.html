@@ -50,7 +50,7 @@
   </main>
 
   <script>
-    const leadId = {{ lead.id }};
+    const leadToken = {{ lead.qualifier_token | tojson }};
     const transcript = document.getElementById('transcript');
     const input = document.getElementById('turnInput');
     const inputRow = document.getElementById('inputRow');
@@ -79,7 +79,7 @@
       addBubble('lead', text);
       input.value = '';
       setBusy(true);
-      fetch(`/qualify/${leadId}/turn`, {
+      fetch(`/qualify/${leadToken}/turn`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
       })
@@ -90,7 +90,7 @@
 
     function finishUp() {
       setBusy(true);
-      fetch(`/qualify/${leadId}/complete`, { method: 'POST' })
+      fetch(`/qualify/${leadToken}/complete`, { method: 'POST' })
         .then(r => r.json())
         .then(showResult)
         .finally(() => setBusy(false));
@@ -108,7 +108,7 @@
             <p>${data.brief || ''}</p>
             <div id="slotList">Loading available times…</div>
           </div>`;
-        fetch(`/qualify/${leadId}/slots`)
+        fetch(`/qualify/${leadToken}/slots`)
           .then(r => r.json())
           .then(slotData => {
             const list = document.getElementById('slotList');
@@ -134,7 +134,7 @@
 
     function bookSlot(iso, list) {
       list.innerHTML = 'Booking…';
-      fetch(`/qualify/${leadId}/book`, {
+      fetch(`/qualify/${leadToken}/book`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slot_start: iso }),
       })
@@ -152,7 +152,7 @@
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendTurn(); }
     });
 
-    fetch(`/qualify/${leadId}/start`, { method: 'POST' })
+    fetch(`/qualify/${leadToken}/start`, { method: 'POST' })
       .then(r => r.json())
       .then(data => {
         starting.style.display = 'none';
