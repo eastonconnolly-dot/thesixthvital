@@ -3,9 +3,25 @@
 Business stack for RPSAS, a physician-communication training company. See
 [REUSE.md](REUSE.md) for how this relates to the founder's existing multi-tenant
 platform ("the Hub") — short version: the Hub is the CRM/business-ops layer
-(leads, deals, pipeline — already solved, used loosely rather than rebuilt);
-this repo is the marketing site plus the part the Hub can't do at all — the
-AI training platform.
+(leads, deals, pipeline), and RPSAS is provisioned there as a real tenant
+(three pipelines, one per track — see [HUB_INTEGRATION.md](HUB_INTEGRATION.md),
+not yet applied) via [`api/services/hub_sync.py`](api/services/hub_sync.py).
+This repo stays the system of record for everything the Hub has no concept
+of — proposals, e-signatures, scorecards, and above all the AI training
+platform, RPSAS's actual product differentiator.
+
+## Status
+
+All six phases from the original brief have a working implementation:
+Sell (site, application, deals, proposals, e-sign, deposits, badges),
+Outreach (list builders, sequences, inbox), Content engine, Practice (the AI
+training platform, including real lesson content), and Ops (digest, backups)
+are all built and tested — 172 tests, `cd api && source .venv/bin/activate
+&& python -m pytest`. Phase 6 (fully founder-off-the-loop automation) has
+not been built. See each phase's section below and each module's own
+`INTEGRATION.md` (`content/`, `ops/`, `outreach/`) for exact status,
+what's genuinely live vs. stubbed, and what needs a credential this
+environment doesn't have.
 
 `BRAND_NAME` (env var, api-side; `site/js/brand.js` on the static site) controls
 every visible instance of the name so it can be renamed in one place.
