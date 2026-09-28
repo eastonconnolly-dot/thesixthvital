@@ -12,14 +12,15 @@ platform, RPSAS's actual product differentiator.
 
 ## Status
 
-All six phases from the original brief have a working implementation:
-Sell (site, application, deals, proposals, e-sign, deposits, badges),
-Outreach (list builders, sequences, inbox), Content engine, Practice (the AI
-training platform, including real lesson content), and Ops (digest, backups)
-are all built and tested — 172 tests, `cd api && source .venv/bin/activate
-&& python -m pytest`. Phase 6 (fully founder-off-the-loop automation) has
-not been built. See each phase's section below and each module's own
-`INTEGRATION.md` (`content/`, `ops/`, `outreach/`) for exact status,
+All six phases from the original brief have a working implementation: Sell,
+Outreach, Content engine, Practice (the AI training platform — verified live
+against a real Anthropic key, not just mocked tests), Ops, and Phase 6
+(founder off the loop: pre-call qualifier, call-to-proposal, onboarding,
+post-delivery automation, content-on-inventory alerting, sales handoff
+readiness) are all built, integrated, and tested — 290 tests,
+`cd api && source .venv/bin/activate && python -m pytest`. See each phase's
+section below and each module's own `INTEGRATION.md` (`content/`, `ops/`,
+`outreach/`, `api/`) for exact status,
 what's genuinely live vs. stubbed, and what needs a credential this
 environment doesn't have.
 
