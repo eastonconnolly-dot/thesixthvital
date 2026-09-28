@@ -60,7 +60,11 @@ SCORE_SCHEMA = {
     "properties": {
         "scores": {
             "type": "object",
-            "properties": {d: {"type": "integer", "minimum": 1, "maximum": 5} for d in DIMENSIONS},
+            # Claude's structured-output schema doesn't support minimum/maximum
+            # on integers (400s at request time) -- enum is the supported way
+            # to constrain the range. shared.rubric.score_encounter() is the
+            # real safety net regardless, re-validating every score below.
+            "properties": {d: {"type": "integer", "enum": [1, 2, 3, 4, 5]} for d in DIMENSIONS},
             "required": list(DIMENSIONS),
             "additionalProperties": False,
         },
@@ -71,7 +75,13 @@ SCORE_SCHEMA = {
             "additionalProperties": False,
         },
         "named_p_initial": {"type": "string", "enum": list(P_MODES)},
-        "named_p_after_shift": {"type": ["string", "null"], "enum": list(P_MODES) + [None]},
+        # A ["string","null"] union + enum containing None 400s against
+        # Claude's structured-output schema validator ("enum value 'proof'
+        # does not match declared type") -- it doesn't support that
+        # union-plus-null-in-enum combination. Empty string is the "no
+        # shift occurred" sentinel instead; score_encounter() below
+        # converts it back to None before returning.
+        "named_p_after_shift": {"type": "string", "enum": list(P_MODES) + [""]},
         "shift_caught": {"type": "boolean"},
         "drill": {"type": "string"},
     },
@@ -100,8 +110,9 @@ def score_encounter(scenario_key, transcript, initial_mode, shift_to_mode=None):
         f"clarity), adaptation (did they adjust when the patient shifted, if it happened), "
         f"outcome (did the encounter land well). For each dimension, quote the single most "
         f"relevant line from the trainee's side of the transcript. Name which P mode the "
-        f"patient was actually in at the start, and after the shift if one occurred (null if "
-        f"no shift). Mark shift_caught true only if a shift occurred AND the trainee visibly "
+        f"patient was actually in at the start, and after the shift if one occurred (empty "
+        f"string for named_p_after_shift if no shift occurred). Mark shift_caught true only "
+        f"if a shift occurred AND the trainee visibly "
         f"adapted to it. Give exactly one concrete drill for what to practice next.\n\n"
         f"TRANSCRIPT:\n{transcript_text}"
     )
@@ -112,6 +123,7 @@ def score_encounter(scenario_key, transcript, initial_mode, shift_to_mode=None):
         output_config={"format": {"type": "json_schema", "schema": SCORE_SCHEMA}},
     )
     data = json.loads(_text(resp))
+    data["named_p_after_shift"] = data.get("named_p_after_shift") or None
 
     from shared.rubric import score_encounter as validate_scores
     validate_scores(data["scores"])  # raises InvalidScoreError if the model somehow drifts
