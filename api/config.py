@@ -2,7 +2,7 @@ import os
 
 
 class Config:
-    BRAND_NAME = os.environ.get("BRAND_NAME", "RPSAS")
+    BRAND_NAME = os.environ.get("BRAND_NAME", "Sixth Vital")
     SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", "dev-secret-change-me")
 
     SQLALCHEMY_DATABASE_URI = os.environ.get(

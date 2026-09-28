@@ -86,7 +86,7 @@ def book_call(message_id):
     lead = message.lead
     slot_start = datetime.fromisoformat(draft.proposed_slots[0])
     try:
-        calendar_client.book_slot(slot_start, summary=f"RPSAS call — {lead.name}", attendee_email=lead.email)
+        calendar_client.book_slot(slot_start, summary=f"Sixth Vital call — {lead.name}", attendee_email=lead.email)
     except Exception as exc:
         current_app.logger.warning("inbox: failed to book call for lead %s: %s", lead.id, exc)
         flash("Could not book the call — check Google Calendar credentials.", "error")

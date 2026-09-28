@@ -194,7 +194,7 @@ def _plan_content(transcript_text, apply_url):
     transcript into the full content plan. Mirrors the output_config
     pattern already used by services/patient_sim.py's score_encounter()."""
     prompt = (
-        "You are the content strategist for RPSAS, a physician-communication "
+        "You are the content strategist for Sixth Vital, a physician-communication "
         "training company. Below is a timestamped transcript of a source video "
         "(a webinar, coaching session, or talk). From it, produce a content plan:\n\n"
         "- 5 to 7 clip windows, each a self-contained hook + payoff moment, each "
@@ -280,7 +280,7 @@ def _persist_plan(plan, batch_id, source_label):
 
     newsletter = plan["newsletter"]
     items.append(ContentItem(
-        title=newsletter.get("subject") or "RPSAS Weekly",
+        title=newsletter.get("subject") or "Sixth Vital Weekly",
         type="newsletter",
         status="draft",
         body=newsletter.get("body", ""),

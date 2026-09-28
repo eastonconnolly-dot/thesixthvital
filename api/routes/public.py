@@ -91,7 +91,7 @@ def public_proof():
         .all()
     )
     testimonials = [
-        {"quote": c.response_text, "attribution": c.participant_name or "RPSAS participant"}
+        {"quote": c.response_text, "attribution": c.participant_name or "Sixth Vital participant"}
         for c in approved
     ]
     return jsonify({"stats": stats, "testimonials": testimonials})

@@ -12,6 +12,7 @@ const ROOT = path.join(__dirname, "..");
 const COPIES = [
   [path.join(ROOT, "shared/brand/tokens.css"), path.join(__dirname, "css/tokens.css")],
   [path.join(ROOT, "shared/brand/badge.svg"), path.join(__dirname, "assets/badge.svg")],
+  [path.join(ROOT, "shared/brand/mark.svg"), path.join(__dirname, "assets/mark.svg")],
 ];
 
 for (const [src, dest] of COPIES) {

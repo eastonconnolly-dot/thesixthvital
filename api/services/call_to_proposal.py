@@ -58,7 +58,7 @@ def extract_call_details(transcript_text):
     "special_terms": str}."""
     package_options = ", ".join(f"{key} ({pkg['label']})" for key, pkg in PACKAGES.items())
     prompt = (
-        "You are reading the transcript of a discovery call between RPSAS's founder and a "
+        "You are reading the transcript of a discovery call between Sixth Vital's founder and a "
         "prospective client. Extract exactly what was agreed: which package they're buying "
         f"(one of: {package_options}), the "
         "delivery date they landed on (empty string if none was pinned down), everyone who "

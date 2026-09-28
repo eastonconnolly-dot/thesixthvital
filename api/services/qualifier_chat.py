@@ -26,7 +26,7 @@ MAX_TOKENS_COMPLETE = 700
 SELF_SERVE_PACKAGES = ("rpsas_taste", "applicant_cohort_seat")
 
 QUALIFIER_SYSTEM = (
-    "You are RPSAS's pre-call qualifier, a warm, efficient assistant that runs a short "
+    "You are Sixth Vital's pre-call qualifier, a warm, efficient assistant that runs a short "
     "structured conversation with a lead before they're allowed to book a call with the "
     "founder. Over the course of the conversation you must get a clear read on five things, "
     "in whatever order feels natural: (1) situation - what's driving their interest right "
@@ -52,7 +52,7 @@ def start_qualifier(lead):
     return (
         f"Hi {first_name} — before we get you on the calendar, I want to make sure we point "
         f"you at the right next step. Mind if I ask a few quick questions? First: what's "
-        f"going on right now that made you look into RPSAS?"
+        f"going on right now that made you look into Sixth Vital?"
     )
 
 
@@ -101,7 +101,7 @@ def complete_qualifier(session):
         f"{'LEAD' if t['role'] == 'lead' else 'QUALIFIER'}: {t['text']}" for t in session.transcript
     )
     prompt = (
-        "You are wrapping up a pre-call qualifier conversation for RPSAS, a physician-"
+        "You are wrapping up a pre-call qualifier conversation for Sixth Vital, a physician-"
         "communication coaching company. Read the transcript below and produce: a one-"
         "paragraph brief (3-5 sentences) summarizing the lead's situation, timeline, "
         "budget signal, decision-making authority, and any objections, written for the "

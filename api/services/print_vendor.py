@@ -44,7 +44,7 @@ def submit_badge_print_order(deal, participant_names):
         for name, qty in counts.items()
     )
     html_body = f"""
-    <p>New {brand} METHOD badge print order for deal #{deal.id}
+    <p>New RPSAS METHOD badge print order for deal #{deal.id}
     ({lead.name if lead else "—"}{org_suffix}).</p>
     <table style="border-collapse:collapse;width:100%;max-width:480px;">
       <tr>

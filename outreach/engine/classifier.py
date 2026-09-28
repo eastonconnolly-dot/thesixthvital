@@ -33,7 +33,7 @@ MAX_TOKENS = 600
 SLOTS_TO_PROPOSE = 3
 
 SYSTEM_PROMPT = (
-    "You are triaging inbound email replies for RPSAS, a physician-communication "
+    "You are triaging inbound email replies for Sixth Vital, a physician-communication "
     "training company running cold outreach sequences. Given a lead's reply to one "
     "of our nurture emails, decide whether it reads as positive-intent -- they want "
     "to talk, ask about pricing or scheduling, express real interest, or ask a "

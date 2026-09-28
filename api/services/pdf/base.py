@@ -56,4 +56,4 @@ def register_brand_fonts():
 
 
 def brand_name():
-    return os.environ.get("BRAND_NAME", "RPSAS")
+    return os.environ.get("BRAND_NAME", "Sixth Vital")

@@ -1,14 +1,15 @@
-# RPSAS
+# Sixth Vital
 
-Business stack for RPSAS, a physician-communication training company. See
+Business stack for Sixth Vital, a physician-communication training company
+built around the RPSAS Method (Read, Pick, Speak, Ask, Shift). See
 [REUSE.md](REUSE.md) for how this relates to the founder's existing multi-tenant
 platform ("the Hub") — short version: the Hub is the CRM/business-ops layer
-(leads, deals, pipeline), and RPSAS is provisioned there as a real tenant
+(leads, deals, pipeline), and Sixth Vital is provisioned there as a real tenant
 (three pipelines, one per track — see [HUB_INTEGRATION.md](HUB_INTEGRATION.md),
 not yet applied) via [`api/services/hub_sync.py`](api/services/hub_sync.py).
 This repo stays the system of record for everything the Hub has no concept
 of — proposals, e-signatures, scorecards, and above all the AI training
-platform, RPSAS's actual product differentiator.
+platform (RPSAS Practice), Sixth Vital's actual product differentiator.
 
 ## Status
 

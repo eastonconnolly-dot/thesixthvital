@@ -2,8 +2,8 @@
 // Every element with [data-brand] gets its text replaced; [data-brand-attr]
 // elements get the named attribute rewritten (used for e.g. document title).
 window.RPSAS_BRAND = {
-  name: "RPSAS",
-  tagline: "Physician Communication Training",
+  name: "Sixth Vital",
+  tagline: "Communication is the sixth vital sign.",
 };
 
 (function applyBrand() {

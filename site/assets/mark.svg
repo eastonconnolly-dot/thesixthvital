@@ -1,0 +1,8 @@
+<svg viewBox="0 0 76 76" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="markTitle">
+  <title id="markTitle">Sixth Vital mark</title>
+  <circle cx="38" cy="38" r="33" fill="none" stroke="#F4EFE6" stroke-width="2.5"/>
+  <path d="M 12 40 L 22 40 L 26 33 L 30 47 L 34 40 L 40 40 L 44 20 L 49 58 L 53 40 L 64 40"
+        fill="none" stroke="#F4EFE6" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M 40 40 L 44 20 L 49 58 L 53 40"
+        fill="none" stroke="#E4573D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

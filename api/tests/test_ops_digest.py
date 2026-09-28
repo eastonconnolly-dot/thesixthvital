@@ -223,4 +223,4 @@ def test_send_digest_sends_email_via_gmail_client(app):
         assert kwargs["to_email"] == "founder@example.com"
         assert "Weekly Digest" in kwargs["subject"]
         assert "<html" not in kwargs["html_body"]  # digest.py hands gmail_client a body fragment, not a full doc
-        assert "RPSAS" in kwargs["subject"] or "RPSAS" in kwargs["html_body"]
+        assert "Sixth Vital" in kwargs["subject"] or "Sixth Vital" in kwargs["html_body"]

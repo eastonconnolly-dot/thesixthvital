@@ -69,7 +69,7 @@ def _plan_playbook(transcripts):
     score_encounter() / content/ingest.py's _plan_content() pattern."""
     joined = "\n\n---CALL TRANSCRIPT---\n\n".join(_transcript_text(t) for t in transcripts)
     prompt = (
-        "You are a sales enablement strategist for RPSAS, a physician-communication "
+        "You are a sales enablement strategist for Sixth Vital, a physician-communication "
         "training company selling $10k+ intensives and cohort programs. Below are "
         f"{len(transcripts)} transcripts of real sales/discovery calls. Read through "
         "all of them and produce a call playbook a delegated closer (not the founder) "

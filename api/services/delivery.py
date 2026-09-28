@@ -107,15 +107,14 @@ def _provision_practice_seat(deal, scorecard):
         current_app.logger.warning("delivery: practice seat provisioning failed for scorecard=%s: %s", scorecard.id, exc)
         return None
 
-    brand = current_app.config["BRAND_NAME"]
     fname = first_name(scorecard.participant_name)
     gmail_client.send_email(
         to_email=scorecard.participant_email,
-        subject=f"Your {brand} Practice seat is ready",
+        subject="Your RPSAS Practice seat is ready",
         html_body=(
             f"<p>Hi {fname},</p>"
             f"<p>Keep sharpening the skills from your session -- your "
-            f"{brand} Practice seat is ready (7-day free trial included).</p>"
+            f"RPSAS Practice seat is ready (7-day free trial included).</p>"
             f"<p><a href=\"{sign_in_url}\">Sign in to Practice</a></p>"
         ),
         unsubscribe_url=_unsubscribe_url(user.lead_id),

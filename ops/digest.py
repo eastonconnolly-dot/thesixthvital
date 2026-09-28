@@ -243,7 +243,7 @@ METRIC_ORDER = [
 
 
 def render_html(digest):
-    brand = current_app.config.get("BRAND_NAME", "RPSAS")
+    brand = current_app.config.get("BRAND_NAME", "Sixth Vital")
     window = digest["window"]
     metrics = digest["metrics"]
 
@@ -299,7 +299,7 @@ def send_digest(as_of=None):
 
     digest = build_digest(as_of=as_of)
     html = render_html(digest)
-    brand = current_app.config.get("BRAND_NAME", "RPSAS")
+    brand = current_app.config.get("BRAND_NAME", "Sixth Vital")
     week_of = digest["window"]["current_start"].date().isoformat()
     subject = f"{brand} Weekly Digest — week of {week_of}"
 

@@ -192,7 +192,7 @@ def book(token):
         return jsonify({"error": "slot_start must be an ISO 8601 datetime"}), 400
 
     try:
-        event = calendar_client.book_slot(slot_start, summary=f"RPSAS discovery call — {lead.name}", attendee_email=lead.email)
+        event = calendar_client.book_slot(slot_start, summary=f"Sixth Vital discovery call — {lead.name}", attendee_email=lead.email)
     except Exception as exc:
         current_app.logger.warning("qualifier: failed to book call for lead %s: %s", lead.id, exc)
         return jsonify({"error": "could not book the call — check Google Calendar credentials"}), 502

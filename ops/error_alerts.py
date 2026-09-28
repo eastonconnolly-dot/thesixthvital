@@ -36,7 +36,7 @@ def alert(subject, detail=""):
     if not founder_email:
         raise RuntimeError("FOUNDER_EMAIL not configured -- cannot send alert.")
 
-    brand = current_app.config.get("BRAND_NAME", "RPSAS")
+    brand = current_app.config.get("BRAND_NAME", "Sixth Vital")
     escaped = (detail or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     html_body = (
         f'<p style="font-family:-apple-system,sans-serif;color:#17263B;">'

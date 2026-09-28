@@ -1,13 +1,26 @@
 """CR80 badge — the RPSAS Method wordmark, letters rising bottom-left to
 top-right with a word above each letter and sub-words in a horizontal row
-beneath it. Print-ready PDF (with bleed) plus a PNG for the lead magnet."""
+beneath it. Print-ready PDF (with bleed) plus a PNG for the lead magnet.
+
+Colored on its own true-black/signal-red card (see BADGE_* below) rather
+than the shared INK/AMBER/IVORY/MUTED constants from .base -- the badge is
+the one physical-product artifact that moved to the new Sixth Vital mark's
+palette; proposal.py and scorecard.py (formal documents) intentionally
+still use the shared ivory/navy palette from .base until/unless those get
+the same treatment."""
 
 import io
 
+from reportlab.lib.colors import HexColor
 from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
 
-from .base import AMBER, INK, IVORY, MUTED, register_brand_fonts, DISPLAY_FONT, BODY_FONT_BOLD, BODY_FONT
+from .base import register_brand_fonts, DISPLAY_FONT, BODY_FONT_BOLD, BODY_FONT
+
+BADGE_BG = HexColor("#0B0B0B")
+BADGE_IVORY = HexColor("#F4EFE6")
+BADGE_RED = HexColor("#E4573D")
+BADGE_MUTED = HexColor("#9C9A92")
 
 CARD_W = 3.375 * inch
 CARD_H = 2.125 * inch
@@ -38,34 +51,34 @@ def render_badge_pdf(participant_name=None):
     buf = io.BytesIO()
     c = canvas.Canvas(buf, pagesize=(PAGE_W, PAGE_H))
 
-    c.setFillColor(IVORY)
+    c.setFillColor(BADGE_BG)
     c.rect(0, 0, PAGE_W, PAGE_H, stroke=0, fill=1)
 
     points = _anchor_points(len(LETTERS), BLEED + 0.35 * inch, BLEED + 0.3 * inch, PAGE_W, PAGE_H)
 
-    c.setStrokeColor(AMBER)
+    c.setStrokeColor(BADGE_RED)
     c.setLineWidth(1.2)
     c.line(points[0][0], points[0][1], points[-1][0], points[-1][1])
 
     for (word, letter, subwords), (x, y) in zip(LETTERS, points):
-        c.setFillColor(AMBER)
+        c.setFillColor(BADGE_RED)
         c.setFont(BODY_FONT_BOLD, 6)
         c.drawCentredString(x, y + 0.34 * inch, word)
 
-        c.setFillColor(INK)
+        c.setFillColor(BADGE_IVORY)
         c.setFont(DISPLAY_FONT, 22)
         c.drawCentredString(x, y - 0.06 * inch, letter)
 
-        c.setFillColor(MUTED)
+        c.setFillColor(BADGE_MUTED)
         c.setFont(BODY_FONT, 4.6)
         c.drawCentredString(x, y - 0.22 * inch, subwords)
 
-    c.setFillColor(INK)
+    c.setFillColor(BADGE_IVORY)
     c.setFont(BODY_FONT_BOLD, 7)
     c.drawCentredString(PAGE_W / 2, BLEED + 0.06 * inch, "RPSAS METHOD")
 
     if participant_name:
-        c.setFillColor(MUTED)
+        c.setFillColor(BADGE_MUTED)
         c.setFont(BODY_FONT, 5.5)
         c.drawCentredString(PAGE_W / 2, PAGE_H - BLEED - 0.14 * inch, participant_name)
 
@@ -82,7 +95,7 @@ def render_badge_png(participant_name=None, scale=4):
     from PIL import Image, ImageDraw, ImageFont
 
     w, h = int(PAGE_W / inch * 300 * scale / 4), int(PAGE_H / inch * 300 * scale / 4)
-    img = Image.new("RGB", (w, h), "#F4EFE6")
+    img = Image.new("RGB", (w, h), "#0B0B0B")
     draw = ImageDraw.Draw(img)
 
     def font(size):
@@ -95,16 +108,16 @@ def render_badge_png(participant_name=None, scale=4):
     points = _anchor_points(len(LETTERS), margin_x, margin_y, w, h)
     points = [(x, h - y) for x, y in points]  # flip y for image coords
 
-    draw.line([points[0], points[-1]], fill="#E0A458", width=2)
+    draw.line([points[0], points[-1]], fill="#E4573D", width=2)
 
     for (word, letter, subwords), (x, y) in zip(LETTERS, points):
-        draw.text((x, y - 34), word, fill="#E0A458", font=font(11), anchor="mm")
-        draw.text((x, y), letter, fill="#17263B", font=font(46), anchor="mm")
-        draw.text((x, y + 28), subwords, fill="#8A97A8", font=font(9), anchor="mm")
+        draw.text((x, y - 34), word, fill="#E4573D", font=font(11), anchor="mm")
+        draw.text((x, y), letter, fill="#F4EFE6", font=font(46), anchor="mm")
+        draw.text((x, y + 28), subwords, fill="#9C9A92", font=font(9), anchor="mm")
 
-    draw.text((w / 2, h - 14), "RPSAS METHOD", fill="#17263B", font=font(12), anchor="mm")
+    draw.text((w / 2, h - 14), "RPSAS METHOD", fill="#F4EFE6", font=font(12), anchor="mm")
     if participant_name:
-        draw.text((w / 2, 14), participant_name, fill="#8A97A8", font=font(10), anchor="mm")
+        draw.text((w / 2, 14), participant_name, fill="#9C9A92", font=font(10), anchor="mm")
 
     buf = io.BytesIO()
     img.save(buf, format="PNG")

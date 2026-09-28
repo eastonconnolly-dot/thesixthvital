@@ -88,7 +88,7 @@ def _upload_via_gh(path):
         tag = tag[: -len(suffix)] if tag.endswith(suffix) else tag
     proc = subprocess.run(
         ["gh", "release", "create", tag, path, "--repo", repo, "--title", tag,
-         "--notes", "Automated RPSAS database backup.", "--prerelease"],
+         "--notes", "Automated Sixth Vital database backup.", "--prerelease"],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
     )
     if proc.returncode != 0:

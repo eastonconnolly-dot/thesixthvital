@@ -14,7 +14,7 @@ services:
     startCommand: gunicorn wsgi:app
     envVars:
       - key: BRAND_NAME
-        value: RPSAS
+        value: Sixth Vital
       - key: DATABASE_URL
         fromDatabase:
           name: rpsas-db
@@ -107,7 +107,7 @@ services:
           name: rpsas-db
           property: connectionString
       - key: BRAND_NAME
-        value: RPSAS
+        value: Sixth Vital
       - key: FOUNDER_EMAIL
         sync: false
       - key: GMAIL_SENDER_EMAIL
@@ -141,7 +141,7 @@ services:
           name: rpsas-db
           property: connectionString
       - key: BRAND_NAME
-        value: RPSAS
+        value: Sixth Vital
       - key: FOUNDER_EMAIL
         sync: false
       - key: GMAIL_SENDER_EMAIL
@@ -176,7 +176,7 @@ services:
           name: rpsas-db
           property: connectionString
       - key: BRAND_NAME
-        value: RPSAS
+        value: Sixth Vital
       - key: FOUNDER_EMAIL
         sync: false
       - key: GMAIL_SENDER_EMAIL
@@ -208,7 +208,7 @@ services:
           name: rpsas-db
           property: connectionString
       - key: BRAND_NAME
-        value: RPSAS
+        value: Sixth Vital
       - key: FOUNDER_EMAIL
         sync: false
       - key: GMAIL_SENDER_EMAIL
@@ -236,7 +236,7 @@ services:
           name: rpsas-db
           property: connectionString
       - key: BRAND_NAME
-        value: RPSAS
+        value: Sixth Vital
       - key: FOUNDER_EMAIL
         sync: false
       - key: GMAIL_SENDER_EMAIL
@@ -262,7 +262,7 @@ services:
           name: rpsas-db
           property: connectionString
       - key: BRAND_NAME
-        value: RPSAS
+        value: Sixth Vital
       - key: FOUNDER_EMAIL
         sync: false
       - key: GMAIL_SENDER_EMAIL
@@ -286,7 +286,7 @@ services:
           name: rpsas-db
           property: connectionString
       - key: BRAND_NAME
-        value: RPSAS
+        value: Sixth Vital
       - key: FOUNDER_EMAIL
         sync: false
       - key: GMAIL_SENDER_EMAIL
@@ -314,7 +314,7 @@ services:
           name: rpsas-db
           property: connectionString
       - key: BRAND_NAME
-        value: RPSAS
+        value: Sixth Vital
       - key: FOUNDER_EMAIL
         sync: false
       - key: GMAIL_SENDER_EMAIL

@@ -2,9 +2,14 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "site-preview",
+      "name": "site",
       "url": "http://localhost:8010",
       "port": 8010
+    },
+    {
+      "name": "api",
+      "url": "http://localhost:5050",
+      "port": 5050
     }
   ]
 }

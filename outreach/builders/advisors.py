@@ -37,7 +37,7 @@ from .common import Candidate
 log = logging.getLogger(__name__)
 
 TIMEOUT_SECONDS = 10
-USER_AGENT = "RPSASOutreachBot/1.0 (+https://rpsas.example.com/about-our-outreach)"
+USER_AGENT = "SixthVitalOutreachBot/1.0 (+https://sixthvital.example.com/about-our-outreach)"
 TITLE_KEYWORDS = ("advisor", "advising", "director", "pre-health", "pre-med")
 
 
