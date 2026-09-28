@@ -1,4 +1,3 @@
-import json
 from unittest.mock import patch
 
 from extensions import db
@@ -75,27 +74,3 @@ def test_stripe_webhook_ignores_unrelated_event_types(app, client):
     assert resp.status_code == 200
     with app.app_context():
         assert Deal.query.get(deal_id).deposit_paid is False
-
-
-def test_signwell_webhook_marks_signed_in_test_mode(app, client):
-    with app.app_context():
-        deal = _make_deal(app)
-        deal.signwell_envelope_id = "test-envelope-deal-1"
-        db.session.commit()
-        deal_id = deal.id
-        envelope_id = deal.signwell_envelope_id
-
-    payload = {"event": {"type": "document_completed"}, "data": {"object": {"id": envelope_id}}}
-    resp = client.post("/webhooks/signwell", data=json.dumps(payload), content_type="application/json")
-
-    assert resp.status_code == 200
-    with app.app_context():
-        assert Deal.query.get(deal_id).signed_at is not None
-
-
-def test_signwell_webhook_rejects_when_secret_configured_and_missing_header(app, client):
-    app.config["SIGNWELL_WEBHOOK_SECRET"] = "shh"
-    app.config["SIGNWELL_TEST_MODE"] = False
-    resp = client.post("/webhooks/signwell", data=json.dumps({"event": {"type": "document_completed"}}),
-                        content_type="application/json")
-    assert resp.status_code == 400

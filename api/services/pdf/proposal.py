@@ -3,7 +3,7 @@ import io
 from reportlab.lib.pagesizes import LETTER
 from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_LEFT
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.styles import ParagraphStyle
 
 from .base import AMBER, INK, MUTED, WHITE, register_brand_fonts, DISPLAY_FONT, BODY_FONT, BODY_FONT_BOLD, brand_name
@@ -20,8 +20,11 @@ def _styles():
     }
 
 
-def render_proposal_pdf(deal, lead, package_label, deliverables, deposit_link, mailing_address):
-    """deal, lead: dict-like with the fields used below. deliverables: list[str]."""
+def render_proposal_pdf(deal, lead, package_label, deliverables, deposit_link, mailing_address, signature=None):
+    """deal, lead: dict-like with the fields used below. deliverables: list[str].
+    signature (optional): {"typed_name", "signer_name", "signed_at" (str),
+    "png_bytes"} — when present, renders a signed certificate block instead
+    of the "sign here" call to action."""
     styles = _styles()
     buf = io.BytesIO()
     doc = SimpleDocTemplate(
@@ -73,12 +76,27 @@ def render_proposal_pdf(deal, lead, package_label, deliverables, deposit_link, m
         styles["body"],
     ))
 
-    flow.append(Paragraph("Next Step", styles["h2"]))
-    flow.append(Paragraph(
-        f'Sign electronically via the link sent with this proposal, then pay the deposit here: '
-        f'<link href="{deposit_link}" color="#E0A458">{deposit_link}</link>',
-        styles["body"],
-    ))
+    if signature:
+        flow.append(Paragraph("Signature", styles["h2"]))
+        img = Image(io.BytesIO(signature["png_bytes"]), width=2.6 * inch, height=0.9 * inch)
+        img.hAlign = "LEFT"
+        flow.append(img)
+        flow.append(Paragraph(
+            f'Signed by <b>{signature["typed_name"]}</b> ({signature["signer_name"]}) on {signature["signed_at"]}',
+            styles["muted"],
+        ))
+        flow.append(Spacer(1, 10))
+        flow.append(Paragraph(
+            f'Deposit: <link href="{deposit_link}" color="#E0A458">{deposit_link}</link>',
+            styles["body"],
+        ))
+    else:
+        flow.append(Paragraph("Next Step", styles["h2"]))
+        flow.append(Paragraph(
+            f'Sign electronically via the link sent with this proposal, then pay the deposit here: '
+            f'<link href="{deposit_link}" color="#E0A458">{deposit_link}</link>',
+            styles["body"],
+        ))
 
     flow.append(Spacer(1, 28))
     flow.append(Paragraph(f"{brand} &middot; {mailing_address}", styles["muted"]))

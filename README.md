@@ -49,13 +49,15 @@ flask run --port 5050
 Visit `http://localhost:8010` for the site and `http://localhost:5050/admin`
 for the admin (password from `ADMIN_PASSWORD`).
 
-Without `STRIPE_SECRET_KEY` / a live `SIGNWELL_API_KEY`, both clients fall
-back to stub responses so the full apply → qualify → deal → proposal →
-deposit flow is exercisable end-to-end with zero external accounts. Google
-Workspace (Gmail send, Calendar free/busy) has no stub mode — it needs a real
-OAuth client and a one-time `flask google-auth` run — but nothing in Phase 1's
-request path depends on it yet (booking-link/nurture sends are wired for
-Phase 2's outreach engine, not the synchronous `/apply` request).
+E-signature is native (no third-party vendor — see "What's genuinely live"
+below), so it needs no account or key at all, in dev or production. Without
+`STRIPE_SECRET_KEY`, the Stripe client falls back to stub checkout sessions,
+so the full apply → qualify → deal → proposal → sign → deposit flow is
+exercisable end-to-end with zero external accounts. Google Workspace (Gmail
+send, Calendar free/busy) has no stub mode — it needs a real OAuth client and
+a one-time `flask google-auth` run — but nothing in Phase 1's request path
+depends on it yet (booking-link/nurture sends are wired for Phase 2's
+outreach engine, not the synchronous `/apply` request).
 
 ### Tests
 
@@ -63,9 +65,11 @@ Phase 2's outreach engine, not the synchronous `/apply` request).
 cd api && source .venv/bin/activate && python -m pytest
 ```
 
-25 tests covering the rubric scorer, application-qualification scoring, the
-Stripe and SignWell webhook handlers, PDF generation (badge/proposal/scorecard
-all produce valid, non-trivial output), and `/apply`.
+38 tests covering the rubric scorer, application-qualification scoring, the
+Stripe webhook handler, the native e-sign flow (token issuance, canvas
+signature capture, signed-PDF generation, double-sign rejection), PDF
+generation (badge/proposal/scorecard all produce valid, non-trivial output),
+and `/apply`.
 
 ### Deploying
 
@@ -73,28 +77,29 @@ all produce valid, non-trivial output), and `/apply`.
   before each deploy (or wire it into your Pages build step) so brand asset
   changes in `shared/` make it into the published site.
 - **API** → Render, via [render.yaml](render.yaml). `rootDir: api`. Set the
-  `sync: false` env vars in the Render dashboard (Stripe, SignWell, Google,
-  mailing address). Run `flask init-db` once against the new Postgres
-  instance (Render shell) before first use.
+  `sync: false` env vars in the Render dashboard (Stripe, Google, mailing
+  address). Run `flask init-db` once against the new Postgres instance
+  (Render shell) before first use.
 
 ### What's genuinely live vs. what needs your accounts
 
 Built and tested against stub/sandbox data:
 - Application intake + qualification scoring (`POST /apply`)
-- Deal → proposal PDF → SignWell envelope (test mode) → Stripe deposit
-  checkout (stub) → webhook-driven stage transitions
+- Deal → proposal PDF → native e-sign (`/sign/<token>`, canvas signature,
+  signed-PDF regeneration) → Stripe deposit checkout (stub) →
+  webhook-driven stage transitions
 - Badge PDF/PNG, single-participant and cohort scorecard PDFs
 - Admin (single-password, server-rendered, no JS framework)
 
 Needs your real credentials before it does anything live:
 - `STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET` (test mode first, obviously)
-- `SIGNWELL_API_KEY` — and per the code comments in
-  `api/services/signwell_client.py`, verify the exact request/webhook shape
-  against SignWell's current docs before going live; it's modeled on their
-  documented v1 API but untested against a real account
 - Google Workspace OAuth client (`GOOGLE_OAUTH_CLIENT_JSON`) for Gmail send +
   Calendar free/busy — run `flask google-auth` once to mint the token
 - A real domain for `SITE_BASE_URL`/`API_BASE_URL` once deployed
+
+E-signature needs no external account at all — it's native (`api/services/esign.py`,
+`api/routes/esign.py`), modeled on the Hub's own `hub/esign.py` pattern rather
+than a third-party vendor.
 
 ### Design template placeholders
 
@@ -117,8 +122,8 @@ to upgrade automatically, no code changes needed.
 - [x] Qualified path is distinguished from nurture (budget answered + track
       + org present), scored and stored
 - [x] Admin can create a deal from a lead and generate a proposal
-- [x] Proposal PDF renders; SignWell envelope created (test mode verified;
-      live account not tested — see above)
+- [x] Proposal PDF renders; native sign link created, signature captured via
+      canvas, signed PDF regenerated with the signature embedded
 - [x] Stripe deposit checkout session created (stub verified; live test-mode
       key not exercised here — see above); webhook marks `deposit_paid` and
       advances deal stage

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign your agreement — {{ config.BRAND_NAME }}</title>
+  <style>
+    :root { --ink:#17263B; --ivory:#F4EFE6; --amber:#E0A458; --muted:#8A97A8; --border:#d9d3c6; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--ivory); color:var(--ink); }
+    main { max-width:640px; margin:0 auto; padding:40px 24px; }
+    h1 { font-family: Georgia, serif; font-size:1.6rem; }
+    .card { background:#fff; border-radius:12px; padding:24px; margin-bottom:20px; box-shadow:0 4px 16px rgba(23,38,59,0.08); }
+    table { width:100%; border-collapse:collapse; }
+    td { padding:6px 0; font-size:0.92rem; }
+    td.label { color:var(--muted); width:55%; }
+    canvas { border:1px solid var(--border); border-radius:8px; touch-action:none; width:100%; height:160px; background:#fff; }
+    label { font-size:0.88rem; display:block; margin:14px 0 6px; font-weight:600; }
+    input[type=text] { width:100%; padding:8px 10px; border-radius:6px; border:1px solid var(--border); font:inherit; }
+    .btn { display:inline-block; padding:10px 20px; border-radius:8px; background:var(--amber); color:var(--ink); border:none; font-weight:600; cursor:pointer; font-size:0.95rem; }
+    .btn:disabled { opacity:0.5; cursor:not-allowed; }
+    .btn-ghost { background:none; border:1px solid var(--border); color:var(--ink); }
+    .msg { padding:10px 14px; border-radius:8px; font-size:0.9rem; margin-top:14px; display:none; }
+    .msg.show { display:block; }
+    .msg.ok { background:#e3f3e8; color:#2f7a4f; }
+    .msg.err { background:#fbe4e4; color:#a83a3a; }
+    .checkbox-row { display:flex; align-items:flex-start; gap:8px; margin-top:16px; font-size:0.88rem; }
+    a.doc-link { color:var(--ink); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>{{ config.BRAND_NAME }} — Proposal &amp; Agreement</h1>
+
+    <div class="card">
+      <table>
+        <tr><td class="label">Package</td><td>{{ context.get("package_label", "") }}</td></tr>
+        <tr><td class="label">Total investment</td><td>${{ "%.2f"|format(deal.amount_cents / 100) }}</td></tr>
+        <tr><td class="label">Delivery date</td><td>{{ context.get("delivery_date") or "TBD" }}</td></tr>
+      </table>
+      <p><a class="doc-link" href="{{ url_for('esign.sign_document', token=sig_request.token) }}" target="_blank">View full proposal PDF &rarr;</a></p>
+    </div>
+
+    {% if sig_request.status == "signed" %}
+    <div class="card">
+      <p><strong>Signed</strong> on {{ sig_request.signed_at.strftime("%B %d, %Y") }} by {{ sig_request.typed_name }}.</p>
+      {% if context.get("deposit_link") %}
+      <a class="btn" href="{{ context.get('deposit_link') }}">Pay deposit</a>
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="card">
+      <p>Draw your signature below, confirm your name, and agree to the terms in the proposal to continue.</p>
+      <canvas id="pad" width="600" height="160"></canvas>
+      <div>
+        <button type="button" class="btn btn-ghost" id="clear" style="margin-top:8px;">Clear</button>
+      </div>
+
+      <label for="typed_name">Type your full legal name</label>
+      <input type="text" id="typed_name" placeholder="{{ sig_request.signer_name }}" />
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="agree" />
+        <label for="agree" style="margin:0; font-weight:400;">I have read the proposal above and agree to its terms.</label>
+      </div>
+
+      <div style="margin-top:18px;">
+        <button type="button" class="btn" id="submit" disabled>Sign &amp; continue</button>
+      </div>
+      <div class="msg" id="msg" role="status"></div>
+    </div>
+    {% endif %}
+  </main>
+
+  {% if sig_request.status != "signed" %}
+  <script>
+    const canvas = document.getElementById('pad');
+    const ctx = canvas.getContext('2d');
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#17263B';
+    let drawing = false, hasDrawn = false;
+
+    function pos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
+      const point = e.touches ? e.touches[0] : e;
+      return { x: (point.clientX - rect.left) * scaleX, y: (point.clientY - rect.top) * scaleY };
+    }
+    function start(e) { drawing = true; hasDrawn = true; const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); }
+    function move(e) { if (!drawing) return; const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); }
+    function end() { drawing = false; }
+
+    canvas.addEventListener('mousedown', start);
+    canvas.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', end);
+    canvas.addEventListener('touchstart', start, { passive: false });
+    canvas.addEventListener('touchmove', move, { passive: false });
+    canvas.addEventListener('touchend', end);
+
+    document.getElementById('clear').addEventListener('click', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasDrawn = false;
+      updateSubmitState();
+    });
+
+    const typedNameInput = document.getElementById('typed_name');
+    const agreeBox = document.getElementById('agree');
+    const submitBtn = document.getElementById('submit');
+    function updateSubmitState() {
+      submitBtn.disabled = !(hasDrawn && typedNameInput.value.trim() && agreeBox.checked);
+    }
+    typedNameInput.addEventListener('input', updateSubmitState);
+    agreeBox.addEventListener('change', updateSubmitState);
+    canvas.addEventListener('mouseup', updateSubmitState);
+    canvas.addEventListener('touchend', updateSubmitState);
+
+    const msg = document.getElementById('msg');
+    submitBtn.addEventListener('click', () => {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting…';
+      fetch(window.location.pathname, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          typed_name: typedNameInput.value.trim(),
+          agreed: agreeBox.checked,
+          signature_png_base64: canvas.toDataURL('image/png'),
+        }),
+      })
+        .then(r => r.json().then(data => ({ ok: r.ok, data })))
+        .then(({ ok, data }) => {
+          if (!ok) throw new Error(data.error || 'Something went wrong');
+          msg.textContent = 'Signed. Redirecting to the deposit link…';
+          msg.className = 'msg show ok';
+          if (data.deposit_link) setTimeout(() => { window.location.href = data.deposit_link; }, 1200);
+        })
+        .catch(err => {
+          msg.textContent = err.message;
+          msg.className = 'msg show err';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Sign & continue';
+        });
+    });
+  </script>
+  {% endif %}
+</body>
+</html>

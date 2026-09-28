@@ -49,3 +49,11 @@ Per the brief's own instruction ("if a small extension to the Hub is genuinely r
 ## What's net-new either way (lives in this repo regardless)
 
 Marketing site, badge/scorecard/proposal PDF templates (no shared ReportLab helper to inherit — building fresh, HTML-template-style like `hub/pdf.py` rather than raw `reportlab.platypus`), the six outreach list builders, the content engine, the Practice app. None of this depends on resolving the question above.
+
+## Update (founder, 2026-09-28): native e-sign, and reopening the CRM question
+
+Two changes from this session:
+
+1. **E-sign switched from SignWell to native**, modeled directly on `hub/esign.py`'s pattern — a per-signer secret token (`secrets.token_urlsafe`), a public `/sign/<token>` page with an HTML5 canvas for the signature, and a regenerated PDF with the captured signature stamped in on submit. `api/services/signwell_client.py` is deleted; see `api/services/esign.py` and `api/routes/esign.py`. No third-party e-sign account, no per-envelope cost.
+
+2. **The founder wants to lean on the Hub as the actual CRM** ("I don't need another CRM, I have the Hub... we could just create a new customized Hub tenant for RPSAS") rather than the standalone-first split decided above. This is a real reversal of that decision, not a refinement of it, so it's being worked through as its own question rather than assumed — see the conversation for the concrete options being weighed (provisioning a real Hub tenant vs. using only the existing `POST /api/v1/customers` from outside, and what a `track`/`package`/`delivery_date` field ends up mapping to on the Hub's `customers` table). Nothing in the Hub has been touched yet.

@@ -16,10 +16,6 @@ class Config:
     STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
     STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "")
 
-    SIGNWELL_API_KEY = os.environ.get("SIGNWELL_API_KEY", "")
-    SIGNWELL_WEBHOOK_SECRET = os.environ.get("SIGNWELL_WEBHOOK_SECRET", "")
-    SIGNWELL_TEST_MODE = os.environ.get("SIGNWELL_TEST_MODE", "true").lower() == "true"
-
     GMAIL_SENDER_EMAIL = os.environ.get("GMAIL_SENDER_EMAIL", "")
     GOOGLE_OAUTH_CLIENT_JSON = os.environ.get("GOOGLE_OAUTH_CLIENT_JSON", "")
     GOOGLE_TOKEN_JSON = os.environ.get("GOOGLE_TOKEN_JSON", "")

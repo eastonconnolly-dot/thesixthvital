@@ -4,7 +4,7 @@ from flask import Blueprint, current_app, jsonify, request
 
 from extensions import db
 from models import Deal
-from services import signwell_client, stripe_client
+from services import stripe_client
 
 bp = Blueprint("webhooks", __name__)
 
@@ -36,30 +36,6 @@ def stripe_webhook():
             db.session.commit()
         elif deal and kind == "balance":
             deal.balance_paid = True
-            db.session.commit()
-
-    return jsonify({"received": True})
-
-
-@bp.post("/webhooks/signwell")
-def signwell_webhook():
-    payload = request.data
-    signature = request.headers.get("X-SignWell-Signature", "")
-
-    if not signwell_client.verify_webhook_signature(payload, signature):
-        return jsonify({"error": "invalid signature"}), 400
-
-    event = request.get_json(silent=True) or {}
-    event_type = event.get("event", {}).get("type") or event.get("type")
-    envelope_id = (
-        event.get("data", {}).get("object", {}).get("id")
-        or event.get("object", {}).get("id")
-    )
-
-    if event_type in ("document_completed", "document.completed") and envelope_id:
-        deal = Deal.query.filter_by(signwell_envelope_id=envelope_id).first()
-        if deal:
-            deal.signed_at = datetime.now(timezone.utc)
             db.session.commit()
 
     return jsonify({"received": True})

@@ -14,10 +14,8 @@ class TestConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     ADMIN_PASSWORD = "test-admin-password"
-    STRIPE_SECRET_KEY = "sk_test_stub"
+    STRIPE_SECRET_KEY = ""  # empty -> stripe_client uses its stub path, no real network calls
     STRIPE_WEBHOOK_SECRET = "whsec_stub"
-    SIGNWELL_TEST_MODE = True
-    SIGNWELL_WEBHOOK_SECRET = ""
 
 
 @pytest.fixture

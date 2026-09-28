@@ -7,7 +7,7 @@ from flask import (
 
 from extensions import db
 from models import PACKAGES, Deal, Lead
-from services import signwell_client, stripe_client
+from services import esign, stripe_client
 from services.pdf.proposal import render_proposal_pdf
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -96,29 +96,29 @@ def generate_proposal(deal_id):
     checkout = stripe_client.create_deposit_checkout_session(deal, package_label, success_url, cancel_url)
     deal.deposit_stripe_session_id = checkout["id"]
 
+    deal.proposal_context = {
+        "lead_name": lead.name,
+        "lead_org": lead.org,
+        "package_label": package_label,
+        "deliverables": deliverables,
+        "deposit_link": checkout["url"],
+        "delivery_date": deal.delivery_date.isoformat() if deal.delivery_date else None,
+        "mailing_address": current_app.config["COMPANY_MAILING_ADDRESS"],
+    }
+
     pdf_buf = render_proposal_pdf(
-        deal={"amount_cents": deal.amount_cents, "delivery_date": deal.delivery_date.isoformat() if deal.delivery_date else None},
+        deal={"amount_cents": deal.amount_cents, "delivery_date": deal.proposal_context["delivery_date"]},
         lead={"name": lead.name, "org": lead.org},
         package_label=package_label,
         deliverables=deliverables,
         deposit_link=checkout["url"],
         mailing_address=current_app.config["COMPANY_MAILING_ADDRESS"],
     )
+    deal.proposal_pdf_data = pdf_buf.getvalue()
 
-    envelope = signwell_client.create_envelope(
-        pdf_bytes=pdf_buf.getvalue(),
-        filename=f"proposal-{deal.id}.pdf",
-        signer_name=lead.name,
-        signer_email=lead.email,
-        deal_id=deal.id,
-    )
-    deal.signwell_envelope_id = envelope["envelope_id"]
+    sig_request, sign_url = esign.create_signature_request(deal, signer_name=lead.name, signer_email=lead.email)
     deal.stage = "proposal_sent"
     db.session.commit()
 
-    flash(
-        f"Proposal generated{' (SignWell test mode)' if envelope['test_mode'] else ''}. "
-        f"Sign link: {envelope.get('sign_url')}",
-        "success",
-    )
+    flash(f"Proposal generated. Sign link: {sign_url}", "success")
     return redirect(url_for("admin.deal_detail", deal_id=deal.id))

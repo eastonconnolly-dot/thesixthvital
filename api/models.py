@@ -85,8 +85,9 @@ class Deal(db.Model):
     delivery_date = db.Column(db.Date)
     stage = db.Column(db.String(30), nullable=False, default="discovery")
 
-    proposal_pdf_path = db.Column(db.String(400))
-    signwell_envelope_id = db.Column(db.String(120))
+    proposal_pdf_data = db.Column(db.LargeBinary)
+    proposal_context = db.Column(db.JSON)  # inputs used to render the proposal, so signing can re-render it with a signature block appended without re-hitting Stripe for a new deposit link
+    signed_pdf_data = db.Column(db.LargeBinary)
     signed_at = db.Column(db.DateTime(timezone=True))
     deposit_stripe_session_id = db.Column(db.String(200))
     balance_stripe_session_id = db.Column(db.String(200))
@@ -97,6 +98,7 @@ class Deal(db.Model):
     updated = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow, onupdate=utcnow)
 
     sessions = db.relationship("EncounterSession", backref="deal", lazy=True)
+    signature_requests = db.relationship("SignatureRequest", backref="deal", lazy=True)
 
     def to_dict(self):
         return {
@@ -110,6 +112,27 @@ class Deal(db.Model):
             "delivery_date": self.delivery_date.isoformat() if self.delivery_date else None,
             "stage": self.stage,
         }
+
+
+SIGNATURE_STATUSES = ("pending", "signed", "declined")
+
+
+class SignatureRequest(db.Model):
+    """Native e-signature — token-based sign link + canvas capture, modeled
+    on the Hub's own hub/esign.py rather than a third-party e-sign vendor."""
+    __tablename__ = "signature_requests"
+
+    id = db.Column(db.Integer, primary_key=True)
+    deal_id = db.Column(db.Integer, db.ForeignKey("deals.id"), nullable=False)
+    token = db.Column(db.String(64), nullable=False, unique=True, index=True)
+    signer_name = db.Column(db.String(200), nullable=False)
+    signer_email = db.Column(db.String(320), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default="pending")
+    typed_name = db.Column(db.String(200))
+    signature_png = db.Column(db.LargeBinary)
+    signer_ip = db.Column(db.String(64))
+    signed_at = db.Column(db.DateTime(timezone=True))
+    created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
 
 
 PACKAGES = {
