@@ -7,7 +7,7 @@ from flask import (
 
 from extensions import db
 from models import PACKAGES, Deal, Lead
-from services import esign, stripe_client
+from services import esign, hub_sync, stripe_client
 from services.pdf.proposal import render_proposal_pdf
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -68,6 +68,13 @@ def create_deal(lead_id):
     )
     db.session.add(deal)
     db.session.commit()
+
+    # Best-effort Hub sync (see HUB_INTEGRATION.md) — a real deal is the
+    # natural "this lead is worth having in the Hub CRM too" moment. No-ops
+    # cleanly until the Hub side is provisioned and HUB_API_KEY is set.
+    hub_sync.push_lead(lead)
+    hub_sync.push_deal_update(deal)
+
     return redirect(url_for("admin.deal_detail", deal_id=deal.id))
 
 

@@ -20,12 +20,18 @@ def create_app(config_object=Config):
     from routes.webhooks import bp as webhooks_bp
     from routes.esign import bp as esign_bp
     from routes.practice import bp as practice_bp
+    from routes.content_admin import bp as content_admin_bp
+    from routes.inbox import bp as inbox_bp
+    from routes.unsubscribe import bp as unsubscribe_bp
 
     app.register_blueprint(public_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(webhooks_bp)
     app.register_blueprint(esign_bp)
     app.register_blueprint(practice_bp)
+    app.register_blueprint(content_admin_bp)
+    app.register_blueprint(inbox_bp)
+    app.register_blueprint(unsubscribe_bp)
 
     register_cli(app)
 
@@ -80,6 +86,79 @@ def register_cli(app):
                     ))
             db.session.commit()
             print("Seeded nurture sequences.")
+
+    @app.cli.command("send-digest")
+    def send_digest_cmd():
+        """Sends the Monday weekly ops digest to FOUNDER_EMAIL. See
+        ops/digest.py. Scheduled via render.yaml (see ops/INTEGRATION.md)."""
+        from ops.digest import send_digest
+
+        with app.app_context():
+            try:
+                result = send_digest()
+                print(f"Digest sent: {result}")
+            except Exception as e:
+                try:
+                    from ops.error_alerts import alert
+                    alert("Weekly digest failed to send", str(e))
+                except Exception:
+                    pass  # don't let a broken alert path mask the original failure
+                raise
+
+    @app.cli.command("backup-db")
+    def backup_db_cmd():
+        """Nightly DB backup: dump -> gzip -> GitHub release or S3. See
+        ops/backup.py. Scheduled via render.yaml (see ops/INTEGRATION.md)."""
+        from ops.backup import run_backup
+
+        with app.app_context():
+            try:
+                result = run_backup()
+                print(f"Backup uploaded: {result}")
+            except Exception as e:
+                try:
+                    from ops.error_alerts import alert
+                    alert("Nightly DB backup failed", str(e))
+                except Exception:
+                    pass
+                raise
+
+    @app.cli.command("tick-sequences")
+    def tick_sequences_cmd():
+        """Advances due sequence enrollments (sends the next step). See
+        outreach/engine/sequences.py. Scheduled every 15 min via render.yaml."""
+        from outreach.engine import sequences
+
+        with app.app_context():
+            try:
+                result = sequences.tick()
+                print(f"Sequence tick: {result}")
+            except Exception as e:
+                try:
+                    from ops.error_alerts import alert
+                    alert("Sequence tick failed", str(e))
+                except Exception:
+                    pass
+                raise
+
+    @app.cli.command("check-replies")
+    def check_replies_cmd():
+        """Polls Gmail threads for replies, stops enrollments, and classifies
+        positive replies into the admin inbox. See
+        outreach/engine/reply_detection.py. Scheduled every 15 min via render.yaml."""
+        from outreach.engine import reply_detection
+
+        with app.app_context():
+            try:
+                result = reply_detection.check_for_replies()
+                print(f"Reply check: {result}")
+            except Exception as e:
+                try:
+                    from ops.error_alerts import alert
+                    alert("Reply detection failed", str(e))
+                except Exception:
+                    pass
+                raise
 
 
 if __name__ == "__main__":

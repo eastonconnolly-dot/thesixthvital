@@ -53,3 +53,162 @@ services:
         sync: false
       - key: SITE_BASE_URL
         sync: false
+      - key: API_BASE_URL
+        sync: false
+
+      # Phase 2 — outreach
+      - key: GOOGLE_PLACES_API_KEY
+        sync: false
+      - key: HUNTER_API_KEY
+        sync: false
+      - key: APOLLO_API_KEY
+        sync: false
+
+      # Phase 3 — content engine
+      - key: BUFFER_API_KEY
+        sync: false
+      - key: PUBLER_API_KEY
+        sync: false
+      - key: WHISPER_MODEL_SIZE
+        value: base
+
+      # Hub tenant sync — see HUB_INTEGRATION.md. All optional; no-ops until set.
+      - key: HUB_API_BASE_URL
+        sync: false
+      - key: HUB_API_KEY
+        sync: false
+      - key: HUB_PIPELINE_KEY_APPLICANT
+        sync: false
+      - key: HUB_PIPELINE_KEY_PHYSICIAN
+        sync: false
+      - key: HUB_PIPELINE_KEY_PROGRAM
+        sync: false
+
+  - type: cron
+    name: rpsas-weekly-digest
+    runtime: python
+    plan: free
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask send-digest
+    schedule: "0 6 * * 1" # Monday 6am UTC — adjust for the founder's actual timezone
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rpsas-db
+          property: connectionString
+      - key: BRAND_NAME
+        value: RPSAS
+      - key: FOUNDER_EMAIL
+        sync: false
+      - key: GMAIL_SENDER_EMAIL
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_JSON
+        sync: false
+      - key: GOOGLE_TOKEN_JSON
+        sync: false
+      - key: COMPANY_MAILING_ADDRESS
+        sync: false
+      - key: SITE_BASE_URL
+        sync: false
+      - key: STRIPE_PRICE_APPLICANT
+        sync: false
+      - key: STRIPE_PRICE_PHYSICIAN
+        sync: false
+      - key: STRIPE_PRICE_PROGRAM_SEAT
+        sync: false
+
+  - type: cron
+    name: rpsas-nightly-backup
+    runtime: python
+    plan: free
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask backup-db
+    schedule: "0 9 * * *" # nightly, 9am UTC (~1-2am Pacific) — adjust as needed
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rpsas-db
+          property: connectionString
+      - key: BRAND_NAME
+        value: RPSAS
+      - key: FOUNDER_EMAIL
+        sync: false
+      - key: GMAIL_SENDER_EMAIL
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_JSON
+        sync: false
+      - key: GOOGLE_TOKEN_JSON
+        sync: false
+      # pick ONE backup destination:
+      - key: BACKUP_GITHUB_REPO
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: BACKUP_BUCKET
+        sync: false
+      - key: BACKUP_S3_ENDPOINT_URL
+        sync: false
+
+  - type: cron
+    name: rpsas-sequence-tick
+    runtime: python
+    plan: free
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask tick-sequences
+    schedule: "*/15 * * * *" # every 15 min, per the brief — Render's free plan may enforce a coarser minimum; widen if it rejects this
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rpsas-db
+          property: connectionString
+      - key: BRAND_NAME
+        value: RPSAS
+      - key: FOUNDER_EMAIL
+        sync: false
+      - key: GMAIL_SENDER_EMAIL
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_JSON
+        sync: false
+      - key: GOOGLE_TOKEN_JSON
+        sync: false
+      - key: QUO_API_KEY
+        sync: false
+      - key: SEQUENCE_DAILY_SEND_CAP
+        value: "80"
+      - key: SEQUENCE_RAMP_DAYS
+        value: "14"
+      - key: SEQUENCE_RAMP_START_CAP
+        value: "10"
+
+  - type: cron
+    name: rpsas-check-replies
+    runtime: python
+    plan: free
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask check-replies
+    schedule: "*/15 * * * *" # every 15 min, offset from the tick job in practice by Render's own scheduling jitter
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rpsas-db
+          property: connectionString
+      - key: BRAND_NAME
+        value: RPSAS
+      - key: FOUNDER_EMAIL
+        sync: false
+      - key: GMAIL_SENDER_EMAIL
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_JSON
+        sync: false
+      - key: GOOGLE_TOKEN_JSON
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CLAUDE_MODEL
+        value: claude-sonnet-5

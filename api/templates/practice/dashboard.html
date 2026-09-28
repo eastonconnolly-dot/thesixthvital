@@ -90,8 +90,8 @@
             <span class="{{ 'locked' if key != next_lesson and key not in completed_lessons }}">
               {{ key|capitalize }}{% if key in completed_lessons %} ✓{% endif %}
             </span>
-            {% if key == next_lesson %}
-            <button class="btn btn-ghost" data-lesson="{{ key }}" onclick="completeLesson('{{ key }}')">Mark done</button>
+            {% if key == next_lesson or key in completed_lessons %}
+            <a class="btn btn-ghost" href="{{ url_for('practice.lesson_detail', lesson_key=key) }}">{{ "Review" if key in completed_lessons else "Start" }}</a>
             {% endif %}
           </div>
           {% endfor %}
@@ -121,11 +121,6 @@
           .then(r => r.json())
           .then(data => { if (data.checkout_url) window.location.href = data.checkout_url; });
       });
-    }
-
-    function completeLesson(key) {
-      fetch('/practice/lessons/' + key + '/complete', { method: 'POST' })
-        .then(() => window.location.reload());
     }
   </script>
 </body>

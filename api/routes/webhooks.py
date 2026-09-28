@@ -50,6 +50,7 @@ def _handle_deal_checkout(metadata, session):
         db.session.commit()
     elif deal and kind == "balance":
         deal.balance_paid = True
+        deal.balance_paid_at = datetime.now(timezone.utc)
         db.session.commit()
 
 

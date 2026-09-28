@@ -10,4 +10,20 @@ Pillow==10.4.0
 google-auth==2.34.0
 google-auth-oauthlib==1.2.1
 google-api-python-client==2.145.0
+requests==2.32.3
+beautifulsoup4==4.15.0
 pytest==8.3.3
+
+# Phase 5 ops (ops/backup.py) — only needed for the S3-compatible backup
+# upload path; imported lazily so the GitHub-release path (and everything
+# else) works without it. Install if you're setting BACKUP_BUCKET.
+boto3==1.35.36
+
+# Content engine (Phase 3) — optional, self-hosted extras. content/ingest.py
+# and content/cut.py gate cleanly (clear error, no crash) if these aren't
+# installed or ffmpeg isn't on PATH, so the rest of the test suite doesn't
+# need them. Install what you actually plan to use:
+#   yt-dlp             # only needed to ingest from a YouTube URL instead of a local file
+#   faster-whisper      # local transcription (lighter footprint) -- pick one of these two
+#   openai-whisper       # local transcription (needs ffmpeg + torch)
+# Neither is the paid OpenAI Whisper API -- both run entirely on this machine.

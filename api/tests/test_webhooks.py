@@ -53,7 +53,9 @@ def test_stripe_webhook_marks_balance_paid(app, client):
 
     assert resp.status_code == 200
     with app.app_context():
-        assert Deal.query.get(deal_id).balance_paid is True
+        deal = Deal.query.get(deal_id)
+        assert deal.balance_paid is True
+        assert deal.balance_paid_at is not None
 
 
 def test_stripe_webhook_rejects_bad_signature(app, client):

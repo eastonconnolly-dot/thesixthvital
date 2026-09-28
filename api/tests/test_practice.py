@@ -203,6 +203,45 @@ def test_lesson_completion_rejects_unknown_key(app, client):
     assert resp.status_code == 404
 
 
+def test_lesson_detail_renders_first_unlocked_lesson(app, client):
+    _login_via_magic_link(app, client)
+    resp = client.get("/practice/lessons/read")
+    assert resp.status_code == 200
+    assert b"Room, Emotion, Angle, Desire" in resp.data
+    assert b"Mark complete" in resp.data
+
+
+def test_lesson_detail_blocks_locked_lesson(app, client):
+    _login_via_magic_link(app, client)
+    # "shift" is the last lesson -- nothing has been completed yet, so it's locked
+    resp = client.get("/practice/lessons/shift")
+    assert resp.status_code == 302
+    assert resp.headers["Location"].endswith("/practice")
+
+
+def test_lesson_detail_allows_a_completed_lesson_again(app, client):
+    _login_via_magic_link(app, client)
+    client.post("/practice/lessons/read/complete")
+    resp = client.get("/practice/lessons/read")
+    assert resp.status_code == 200
+    assert b"Completed" in resp.data
+    assert b"Mark complete" not in resp.data
+
+
+def test_lesson_detail_unlocks_next_lesson_only_after_completing_prior(app, client):
+    _login_via_magic_link(app, client)
+    # "pick" is locked before "read" is completed
+    assert client.get("/practice/lessons/pick").status_code == 302
+    client.post("/practice/lessons/read/complete")
+    assert client.get("/practice/lessons/pick").status_code == 200
+
+
+def test_lesson_detail_404_for_unknown_key(app, client):
+    _login_via_magic_link(app, client)
+    resp = client.get("/practice/lessons/not_a_lesson")
+    assert resp.status_code == 404
+
+
 # ── subscription checkout + webhook ────────────────────────────────────
 
 def test_subscribe_returns_stub_checkout_when_stripe_unconfigured(app, client):

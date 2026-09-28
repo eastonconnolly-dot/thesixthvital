@@ -32,6 +32,8 @@ class Lead(db.Model):
     tags = db.Column(db.JSON, nullable=False, default=list)
     created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
 
+    hub_customer_id = db.Column(db.Integer)  # set once services/hub_sync.py has pushed this lead into the Hub
+
     applications = db.relationship("Application", backref="lead", lazy=True)
     deals = db.relationship("Deal", backref="lead", lazy=True)
     enrollments = db.relationship("SequenceEnrollment", backref="lead", lazy=True)
@@ -90,6 +92,7 @@ class Deal(db.Model):
     deposit_paid_at = db.Column(db.DateTime(timezone=True))
     balance_due_cents = db.Column(db.Integer, nullable=False, default=0)
     balance_paid = db.Column(db.Boolean, nullable=False, default=False)
+    balance_paid_at = db.Column(db.DateTime(timezone=True))  # Phase 5 (ops/digest.py cash-collected metric); mirrors deposit_paid_at. routes/webhooks.py's _handle_deal_checkout sets balance_paid but not yet this timestamp -- see ops/INTEGRATION.md.
     delivery_date = db.Column(db.Date)
     stage = db.Column(db.String(30), nullable=False, default="discovery")
 
@@ -352,3 +355,34 @@ class MicroLessonProgress(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("practice_users.id"), nullable=False)
     lesson_key = db.Column(db.String(20), nullable=False)
     completed_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+
+
+# ── RPSAS Outreach (Phase 2: list builders + sequence engine) ──────────
+
+class SuppressedEmail(db.Model):
+    """Bounce/unsubscribe suppression list, checked before every enrollment
+    and every builder-side dedup pass. Deliberately minimal per the brief."""
+    __tablename__ = "suppressed_emails"
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(320), nullable=False, unique=True, index=True)
+    reason = db.Column(db.String(60), nullable=False, default="bounced")  # bounced | unsubscribed | manual
+    created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+
+
+class MessageDraft(db.Model):
+    """A classifier-proposed reply to an inbound Message, shown in the admin
+    inbox for one-click approve/book/dismiss."""
+    __tablename__ = "message_drafts"
+
+    id = db.Column(db.Integer, primary_key=True)
+    message_id = db.Column(db.Integer, db.ForeignKey("messages.id"), nullable=False)
+    positive = db.Column(db.Boolean, nullable=False, default=False)
+    confidence = db.Column(db.Float, nullable=False, default=0.0)
+    draft_body = db.Column(db.Text)
+    proposed_slots = db.Column(db.JSON, default=list)  # list of ISO datetime strings
+    approved = db.Column(db.Boolean, nullable=False, default=False)
+    dismissed = db.Column(db.Boolean, nullable=False, default=False)
+    created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+
+    message = db.relationship("Message", backref=db.backref("draft", uselist=False))

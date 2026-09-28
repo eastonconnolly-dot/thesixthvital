@@ -7,6 +7,7 @@ from flask import (
 from extensions import db
 from models import MICRO_LESSONS, MicroLessonProgress, PracticeSession, PracticeUser
 from services import magic_link, patient_sim, stripe_client
+from shared.prompts.lessons import LESSONS, render_lesson_html
 from shared.prompts.scenarios import SCENARIOS
 
 bp = Blueprint("practice", __name__, url_prefix="/practice")
@@ -209,6 +210,24 @@ def _session_result(practice_session):
 def session_detail(session_id):
     practice_session = PracticeSession.query.filter_by(id=session_id, user_id=g.practice_user.id).first_or_404()
     return render_template("practice/session.html", practice_session=practice_session, scenario=SCENARIOS[practice_session.scenario_key])
+
+
+@bp.get("/lessons/<lesson_key>")
+@login_required
+def lesson_detail(lesson_key):
+    if lesson_key not in LESSONS:
+        return jsonify({"error": "unknown lesson"}), 404
+
+    completed = {p.lesson_key for p in g.practice_user.lesson_progress}
+    next_lesson = next((k for k in MICRO_LESSONS if k not in completed), None)
+    if lesson_key not in completed and lesson_key != next_lesson:
+        return redirect(url_for("practice.dashboard"))
+
+    return render_template(
+        "practice/lesson.html", lesson=LESSONS[lesson_key], lesson_key=lesson_key,
+        lesson_html=render_lesson_html(LESSONS[lesson_key]["body"]),
+        already_completed=lesson_key in completed,
+    )
 
 
 @bp.post("/lessons/<lesson_key>/complete")

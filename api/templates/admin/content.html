@@ -1,0 +1,60 @@
+{% extends "admin/base.html" %}
+{% block title %}Content{% endblock %}
+{% block content %}
+<h1>Content Queue</h1>
+
+<div class="card">
+  <p style="margin:0 0 12px 0;">
+    {% for s in statuses %}
+    <span class="tag">{{ s }}: {{ counts.get(s, 0) }}</span>
+    {% endfor %}
+  </p>
+  <form method="get" style="display:flex; gap:8px; align-items:center; margin:0;">
+    <label for="status" style="margin:0;">Filter</label>
+    <select id="status" name="status" onchange="this.form.submit()" style="width:auto; margin:0;">
+      <option value="">All statuses</option>
+      {% for s in statuses %}
+      <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+{% for batch in batches %}
+<h2>Batch {{ batch.batch_id }}</h2>
+<div class="card">
+  <p style="color: var(--muted); font-size:0.85rem; margin-top:0;">Source: {{ batch.source_video }}</p>
+  <form method="post" action="{{ url_for('content_admin.approve_all') }}" style="margin-bottom:16px;">
+    <input type="hidden" name="batch_id" value="{{ batch.batch_id }}" />
+    <button class="btn" type="submit">Approve all drafts in this batch</button>
+  </form>
+  <table>
+    <thead>
+      <tr><th>Type</th><th>Title</th><th>Status</th><th>Created</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for item in batch.content_items %}
+      <tr>
+        <td><span class="tag">{{ item.type }}</span></td>
+        <td>{{ item.title or "—" }}</td>
+        <td>{{ item.status }}</td>
+        <td>{{ item.created.strftime("%b %d, %Y") if item.created else "—" }}</td>
+        <td>
+          <div style="display:flex; gap:6px;">
+            <form method="post" action="{{ url_for('content_admin.approve', item_id=item.id) }}" style="margin:0;">
+              <button class="btn" type="submit" {% if item.status != "draft" %}disabled{% endif %}>Approve</button>
+            </form>
+            <form method="post" action="{{ url_for('content_admin.reject', item_id=item.id) }}" style="margin:0;">
+              <button class="btn" type="submit" style="background: var(--border);">Reject</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card"><p>No content yet — run <code>content/ingest.py &lt;video&gt;</code> to generate a batch.</p></div>
+{% endfor %}
+{% endblock %}

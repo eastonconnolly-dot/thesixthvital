@@ -22,6 +22,14 @@ class TestConfig(Config):
 @pytest.fixture
 def app():
     application = create_app(TestConfig)
+
+    # content_admin (Phase 3) isn't registered in app.py yet — see
+    # content/INTEGRATION.md — so it's wired in here for tests. Guarded so
+    # this becomes a harmless no-op once app.py registers it for real.
+    if "content_admin" not in application.blueprints:
+        from routes.content_admin import bp as content_admin_bp
+        application.register_blueprint(content_admin_bp)
+
     with application.app_context():
         _db.create_all()
         yield application

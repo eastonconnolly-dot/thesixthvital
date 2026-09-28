@@ -7,6 +7,7 @@
   <p><strong>Stage:</strong> <span class="tag">{{ deal.stage }}</span></p>
   <p><strong>Delivery date:</strong> {{ deal.delivery_date or "TBD" }}</p>
   <p><strong>Deposit paid:</strong> {{ "Yes" if deal.deposit_paid else "No" }}</p>
+  <p><strong>Hub CRM:</strong> {{ "Customer #" ~ lead.hub_customer_id if lead.hub_customer_id else "Not synced yet" }}</p>
   <p><strong>Signed:</strong> {{ deal.signed_at.strftime("%b %d, %Y") if deal.signed_at else "Not yet" }}</p>
   {% if deal.signature_requests %}
     {% set latest = deal.signature_requests[-1] %}
