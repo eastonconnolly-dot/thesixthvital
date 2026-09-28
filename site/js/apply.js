@@ -24,9 +24,14 @@
         if (!res.ok) throw new Error("Request failed");
         return res.json();
       })
-      .then(function () {
+      .then(function (result) {
         form.reset();
         form.hidden = true;
+        if (result.qualified && result.lead_id) {
+          showMsg("You're a fit — taking you to a quick two-minute chat to get you booked…", "ok");
+          window.location.href = window.RPSAS_CONFIG.apiBase + "/qualify/" + result.lead_id;
+          return;
+        }
         showMsg(
           "Application received. If it's a fit, you'll get an email within one business day with a link to book a call.",
           "ok"

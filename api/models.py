@@ -105,6 +105,41 @@ class Deal(db.Model):
     balance_invoice_sent_at = db.Column(db.DateTime(timezone=True))
     balance_reminder_sent_at = db.Column(db.DateTime(timezone=True))
 
+    # Phase 6: pre-call qualifier (services/qualifier_chat.py) writes its
+    # one-paragraph brief here once a lead clears the $10k+ bar and a Deal
+    # is opened for them -- kept on the Deal (rather than only on
+    # QualifierSession) so it's visible wherever a Deal already is, with no
+    # extra join.
+    qualifier_brief = db.Column(db.Text)
+
+    # Phase 6: call-to-proposal (services/call_to_proposal.py). Set True the
+    # moment the extraction pipeline generates a proposal PDF + e-sign
+    # request + deposit link from a call transcript; cleared by either the
+    # founder's one-click approval (routes/call_intake.py) or the
+    # `flask auto-approve-proposals` 2-hour sweep. Nothing downstream (the
+    # sign link, the deposit link) is emailed/activated while this is True --
+    # `stage` only flips to "proposal_sent" at approval time, same moment
+    # admin.py's generate_proposal() flips it today.
+    proposal_pending_review = db.Column(db.Boolean, nullable=False, default=False)
+    proposal_pending_since = db.Column(db.DateTime(timezone=True))
+
+    # ── Phase 6: onboarding automation (services/onboarding.py) ──────────
+    onboarding_triggered_at = db.Column(db.DateTime(timezone=True))  # idempotency guard for trigger_onboarding()
+    reminder_7d_sent = db.Column(db.Boolean, nullable=False, default=False)
+    reminder_3d_sent = db.Column(db.Boolean, nullable=False, default=False)
+    reminder_1d_sent = db.Column(db.Boolean, nullable=False, default=False)
+
+    # ── Phase 6: post-delivery automation (routes/delivery.py) ───────────
+    delivered_at = db.Column(db.DateTime(timezone=True))  # set once "mark session complete" has run (idempotency guard)
+
+    # ── Phase 6: sales handoff readiness (services/closers.py) ───────────
+    # closer_id null = founder-owned. commission_cents is only ever computed
+    # once the deal actually reaches a stage that represents a real close
+    # (see services/closers.py::sync_commission) -- never set speculatively
+    # ahead of that, so it never overstates what a closer is owed.
+    closer_id = db.Column(db.Integer, db.ForeignKey("closers.id"))
+    commission_cents = db.Column(db.Integer)
+
     created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
     updated = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow, onupdate=utcnow)
 
@@ -144,6 +179,34 @@ class SignatureRequest(db.Model):
     signer_ip = db.Column(db.String(64))
     signed_at = db.Column(db.DateTime(timezone=True))
     created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+
+
+QUALIFIER_STATUSES = ("in_progress", "completed")
+
+
+class QualifierSession(db.Model):
+    """Phase 6 pre-call qualifier: a short Claude-driven chat (see
+    services/qualifier_chat.py) that runs after a qualified application,
+    before anyone is allowed to book a call with the founder. Covers
+    situation/timeline/budget/decision-maker/objections, then writes a
+    one-paragraph brief and a $10k+ budget-fit verdict. A True verdict opens
+    (or reuses) a Deal at stage "discovery" and unlocks the booking routes
+    in routes/qualifier.py; a False verdict routes the lead to self-serve
+    checkout for `recommended_package` instead -- the founder never sees a
+    sub-$10k call."""
+    __tablename__ = "qualifier_sessions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    lead_id = db.Column(db.Integer, db.ForeignKey("leads.id"), nullable=False)
+    transcript = db.Column(db.JSON, nullable=False, default=list)  # [{"role": "lead"|"assistant", "text": ...}]
+    status = db.Column(db.String(20), nullable=False, default="in_progress")  # in_progress | completed
+    brief = db.Column(db.Text)
+    budget_fit = db.Column(db.Boolean)  # True = $10k+ fit, book a call. False = route to self-serve.
+    recommended_package = db.Column(db.String(60))  # a sub-$10k PACKAGES key, set only when budget_fit is False
+    created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+    completed_at = db.Column(db.DateTime(timezone=True))
+
+    lead = db.relationship("Lead", backref="qualifier_sessions")
 
 
 PACKAGES = {
@@ -386,3 +449,167 @@ class MessageDraft(db.Model):
     created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
 
     message = db.relationship("Message", backref=db.backref("draft", uselist=False))
+
+
+# ── RPSAS Founder-off-the-loop automation (Phase 6) ─────────────────────
+# Onboarding (services/onboarding.py) and post-delivery (routes/delivery.py)
+# automation. See api/INTEGRATION.md for the exact wiring gaps this leaves
+# in files this change deliberately avoided touching.
+
+class IntakeForm(db.Model):
+    """One per deal, created by services/onboarding.py::trigger_onboarding().
+    Public form at GET/POST /intake/<token> (routes/intake.py)."""
+    __tablename__ = "intake_forms"
+
+    id = db.Column(db.Integer, primary_key=True)
+    deal_id = db.Column(db.Integer, db.ForeignKey("deals.id"), nullable=False)
+    token = db.Column(db.String(64), nullable=False, unique=True, index=True)
+    responses = db.Column(db.JSON)  # {"emergency_contact":..., "sizing":..., "accessibility":..., "special_requests":...}
+    submitted_at = db.Column(db.DateTime(timezone=True))
+    created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+
+    deal = db.relationship("Deal", backref="intake_forms")
+
+
+class UploadLink(db.Model):
+    """Per-participant baseline-video upload link. Local disk storage today
+    (UPLOAD_STORAGE_DIR) -- see api/INTEGRATION.md for the S3 swap-in note.
+    Public form at GET/POST /upload/<token> (routes/uploads.py)."""
+    __tablename__ = "upload_links"
+
+    id = db.Column(db.Integer, primary_key=True)
+    deal_id = db.Column(db.Integer, db.ForeignKey("deals.id"), nullable=False)
+    participant_name = db.Column(db.String(200), nullable=False)
+    participant_email = db.Column(db.String(320))
+    token = db.Column(db.String(64), nullable=False, unique=True, index=True)
+    uploaded_at = db.Column(db.DateTime(timezone=True))
+    file_path = db.Column(db.String(500))
+    created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+
+    deal = db.relationship("Deal", backref="upload_links")
+
+
+class CohortRoster(db.Model):
+    """program-track only: sponsor-facing participant roster + room/AV
+    checklist. Public form at GET/POST /roster/<token> (routes/intake.py)."""
+    __tablename__ = "cohort_rosters"
+
+    id = db.Column(db.Integer, primary_key=True)
+    deal_id = db.Column(db.Integer, db.ForeignKey("deals.id"), nullable=False)
+    token = db.Column(db.String(64), nullable=False, unique=True, index=True)
+    participants = db.Column(db.JSON, default=list)  # [{"name":..., "email":...}, ...]
+    av_checklist = db.Column(db.JSON, default=dict)  # {"projector": true, "whiteboard": false, ...}
+    submitted_at = db.Column(db.DateTime(timezone=True))
+    created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+
+    deal = db.relationship("Deal", backref="cohort_rosters")
+
+
+CONSENT_KINDS = ("testimonial", "clip_consent")
+
+
+class ConsentRequest(db.Model):
+    """A testimonial or clip-consent ask sent after a scorecard is delivered.
+    Public respond form at GET/POST /consent/<token> (routes/consent.py).
+    `approved` gates whether a granted testimonial shows on the public Proof
+    page -- see api/INTEGRATION.md for the routes/public.py query needed."""
+    __tablename__ = "consent_requests"
+
+    id = db.Column(db.Integer, primary_key=True)
+    scorecard_id = db.Column(db.Integer, db.ForeignKey("scorecards.id"))
+    session_id = db.Column(db.Integer, db.ForeignKey("sessions.id"))
+    kind = db.Column(db.String(20), nullable=False)  # testimonial | clip_consent
+    participant_name = db.Column(db.String(200))
+    participant_email = db.Column(db.String(320))
+    token = db.Column(db.String(64), nullable=False, unique=True, index=True)
+    responded_at = db.Column(db.DateTime(timezone=True))
+    response_text = db.Column(db.Text)
+    granted = db.Column(db.Boolean)
+    approved = db.Column(db.Boolean, nullable=False, default=False)  # founder approval -> Proof page
+    created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+
+    scorecard = db.relationship("Scorecard", backref="consent_requests")
+    session = db.relationship("EncounterSession", backref="consent_requests")
+
+
+FOLLOWUP_KINDS = ("checkin_30day", "referral_ask")
+
+
+class ScheduledFollowup(db.Model):
+    """A due-date row swept by `flask send-scheduled-followups`
+    (services/onboarding.py::send_scheduled_followups). Created by
+    routes/delivery.py's complete() action for each participant's lead."""
+    __tablename__ = "scheduled_followups"
+
+    id = db.Column(db.Integer, primary_key=True)
+    deal_id = db.Column(db.Integer, db.ForeignKey("deals.id"), nullable=False)
+    lead_id = db.Column(db.Integer, db.ForeignKey("leads.id"), nullable=False)
+    kind = db.Column(db.String(30), nullable=False)  # checkin_30day | referral_ask
+    due_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    sent_at = db.Column(db.DateTime(timezone=True))
+    created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+
+    deal = db.relationship("Deal", backref="scheduled_followups")
+    lead = db.relationship("Lead")
+
+
+class ReferralClick(db.Model):
+    """Records a click on a participant's /refer/<lead_id> shareable link.
+    No attribution/tracking beyond "someone clicked" per the brief's scope."""
+    __tablename__ = "referral_clicks"
+
+    id = db.Column(db.Integer, primary_key=True)
+    lead_id = db.Column(db.Integer, db.ForeignKey("leads.id"), nullable=False)
+    created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+
+    lead = db.relationship("Lead")
+
+
+# ── RPSAS Founder-off-the-loop automation (Phase 6, cont'd): content on
+# inventory + sales handoff readiness. See api/services/content_inventory.py,
+# api/services/call_playbook.py, api/services/closers.py, and this repo's
+# top-level INTEGRATION.md for how these wire together.
+
+class InventoryAlertLog(db.Model):
+    """One row per content-inventory "dropped below 30 days" event, so
+    services/content_inventory.py::check_inventory_and_alert() sends the
+    founder exactly one alert per drop-below-threshold event rather than
+    re-alerting every time the daily/weekly cron runs while inventory stays
+    low. `resolved_at` is null while the drop is still "active"; it's set
+    the next time inventory is observed back at/above the threshold, which
+    re-arms alerting for the *next* drop."""
+    __tablename__ = "inventory_alert_log"
+
+    id = db.Column(db.Integer, primary_key=True)
+    sent_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+    days_remaining_at_send = db.Column(db.Float, nullable=False)
+    resolved_at = db.Column(db.DateTime(timezone=True))
+
+
+class CallPlaybook(db.Model):
+    """One row per `services/call_playbook.py::generate_playbook()` run.
+    Admin can regenerate at will (POST /admin/playbook/regenerate); the
+    latest row by generated_at is what GET /admin/playbook shows."""
+    __tablename__ = "call_playbooks"
+
+    id = db.Column(db.Integer, primary_key=True)
+    generated_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+    transcript_count = db.Column(db.Integer, nullable=False, default=0)
+    objections = db.Column(db.JSON, nullable=False, default=list)  # [{"objection": str, "response": str}, ...]
+    close_lines = db.Column(db.JSON, nullable=False, default=list)  # [str, ...]
+
+
+class Closer(db.Model):
+    """A delegated closer for $10k+ deals -- own calendar (its assigned
+    Deals' delivery_dates, see GET /admin/closers/<id>/calendar) and
+    commission tracking (Deal.closer_id / Deal.commission_cents)."""
+    __tablename__ = "closers"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(320), nullable=False, unique=True, index=True)
+    commission_rate = db.Column(db.Float, nullable=False, default=0.10)  # e.g. 0.10 = 10%
+    active = db.Column(db.Boolean, nullable=False, default=True)
+    created = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+
+    deals = db.relationship("Deal", backref="closer", lazy=True)

@@ -2,7 +2,7 @@ import base64
 import binascii
 import io
 
-from flask import Blueprint, abort, jsonify, render_template, request, send_file
+from flask import Blueprint, abort, current_app, jsonify, render_template, request, send_file
 
 from extensions import db
 from services import esign
@@ -89,6 +89,15 @@ def submit_signature(token):
     )
     deal.signed_pdf_data = pdf_buf.getvalue()
     db.session.commit()
+
+    # Phase 6 onboarding kickoff — best-effort. A trainee's signature must
+    # never fail because a downstream welcome email / calendar hold /
+    # badge order hit an unconfigured integration; log and move on.
+    try:
+        from services.onboarding import trigger_onboarding
+        trigger_onboarding(deal)
+    except Exception as e:
+        current_app.logger.warning(f"onboarding trigger failed for deal {deal.id}: {e}")
 
     return jsonify({
         "status": "signed",

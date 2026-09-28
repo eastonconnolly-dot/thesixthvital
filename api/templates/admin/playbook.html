@@ -1,0 +1,61 @@
+{% extends "admin/base.html" %}
+{% block title %}Call Playbook{% endblock %}
+{% block content %}
+<h1>Sales Call Playbook</h1>
+
+<div class="card">
+  {% if not available %}
+  <p style="margin:0;">No call-transcript source is configured yet — this depends on the call-to-proposal
+    work landing a transcript model. See <code>api/services/call_playbook.py</code> for the exact integration point.</p>
+  {% elif transcript_count < min_required %}
+  <p style="margin:0;">Not enough transcribed calls yet — <strong>{{ transcript_count }}/{{ min_required }}</strong>.
+    A playbook needs at least {{ min_required }} transcribed sales calls before it's generated (a thin sample
+    isn't worth a Claude call).</p>
+  {% else %}
+  <p style="margin:0 0 12px 0; color: var(--muted); font-size:0.85rem;">{{ transcript_count }} transcribed calls available.</p>
+  <form method="post" action="{{ url_for('playbook.regenerate') }}" style="margin:0;">
+    <button class="btn" type="submit">Regenerate playbook</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if playbook %}
+<p style="color: var(--muted); font-size:0.85rem;">
+  Generated {{ playbook.generated_at.strftime("%b %d, %Y") if playbook.generated_at else "—" }}
+  from {{ playbook.transcript_count }} calls.
+</p>
+
+<h2>Objections &amp; Responses</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>Objection</th><th>Response</th></tr></thead>
+    <tbody>
+      {% for row in playbook.objections %}
+      <tr>
+        <td>{{ row.objection }}</td>
+        <td>{{ row.response }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="2">No objections recorded.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h2>Close Lines</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>Line</th></tr></thead>
+    <tbody>
+      {% for line in playbook.close_lines %}
+      <tr><td>{{ line }}</td></tr>
+      {% else %}
+      <tr><td>No close lines recorded.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% elif available and transcript_count >= min_required %}
+<div class="card"><p style="margin:0;">No playbook generated yet — click "Regenerate playbook" above.</p></div>
+{% endif %}
+{% endblock %}

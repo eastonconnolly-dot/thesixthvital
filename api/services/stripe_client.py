@@ -48,6 +48,23 @@ def create_deposit_checkout_session(deal, package_label, success_url, cancel_url
     )
 
 
+def create_package_checkout_session(package_key, lead, success_url, cancel_url):
+    """Full-price (not deposit) self-serve checkout for a PACKAGES entry —
+    used by Phase 6's pre-call qualifier (services/qualifier_chat.py) to
+    route a sub-$10k lead straight to checkout instead of a founder call.
+    Falls back to the same stub path as create_checkout_session when Stripe
+    isn't configured."""
+    from models import PACKAGES
+
+    package = PACKAGES[package_key]
+    return create_checkout_session(
+        package["amount_cents"],
+        package["label"],
+        success_url, cancel_url,
+        metadata={"lead_id": str(lead.id), "package": package_key, "kind": "package"},
+    )
+
+
 def create_balance_checkout_session(deal, package_label, success_url, cancel_url):
     return create_checkout_session(
         deal.balance_due_cents,

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Intake form — {{ config.BRAND_NAME }}</title>
+  <style>
+    :root { --ink:#17263B; --ivory:#F4EFE6; --amber:#E0A458; --muted:#8A97A8; --border:#d9d3c6; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--ivory); color:var(--ink); }
+    main { max-width:520px; margin:0 auto; padding:64px 24px; }
+    h1 { font-family: Georgia, serif; font-size:1.6rem; }
+    .card { background:#fff; border-radius:12px; padding:28px; box-shadow:0 4px 16px rgba(23,38,59,0.08); }
+    label { font-size:0.85rem; font-weight:600; display:block; margin:14px 0 6px; }
+    input, textarea { width:100%; padding:9px 10px; border-radius:6px; border:1px solid var(--border); font:inherit; }
+    textarea { min-height:70px; resize:vertical; }
+    .btn { display:inline-block; margin-top:18px; padding:10px 20px; border-radius:8px; background:var(--amber); color:var(--ink); border:none; font-weight:600; cursor:pointer; font-size:0.95rem; }
+    .msg { padding:10px 14px; border-radius:8px; font-size:0.9rem; margin-bottom:14px; }
+    .msg.ok { background:#e3f3e8; color:#2f7a4f; }
+    .msg.err { background:#fbe4e4; color:#a83a3a; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>{{ config.BRAND_NAME }} intake form</h1>
+    <div class="card">
+      {% if error %}<div class="msg err">{{ error }}</div>{% endif %}
+      {% if just_submitted %}
+        <div class="msg ok">Thanks — your intake form has been received.</div>
+      {% elif already_submitted %}
+        <div class="msg ok">This intake form was already submitted. Thank you.</div>
+      {% else %}
+      <form method="post">
+        <label for="emergency_contact">Emergency contact (name &amp; phone)</label>
+        <input type="text" id="emergency_contact" name="emergency_contact" />
+
+        <label for="sizing">Sizing for materials (e.g. shirt size)</label>
+        <input type="text" id="sizing" name="sizing" />
+
+        <label for="accessibility">Any accessibility needs?</label>
+        <textarea id="accessibility" name="accessibility"></textarea>
+
+        <label for="special_requests">Special requests</label>
+        <textarea id="special_requests" name="special_requests"></textarea>
+
+        <button type="submit" class="btn">Submit</button>
+      </form>
+      {% endif %}
+    </div>
+  </main>
+</body>
+</html>

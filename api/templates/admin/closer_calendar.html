@@ -1,0 +1,39 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ closer.name }} — Calendar{% endblock %}
+{% block content %}
+<h1>{{ closer.name }}'s Calendar</h1>
+<p style="color: var(--muted); font-size:0.85rem;">
+  {{ closer.email }} &middot; {{ "%.0f%%"|format(closer.commission_rate * 100) }} commission
+  &middot; <a href="{{ url_for('closers.list_closers') }}">Back to closers</a>
+</p>
+
+<div class="card">
+  <p style="margin-top:0; color: var(--muted); font-size:0.85rem;">
+    A simple list of this closer's assigned deals by delivery date — not a real calendar
+    integration, which is out of scope for this stage of the build.
+  </p>
+  <table>
+    <thead><tr><th>Deal</th><th>Lead</th><th>Package</th><th>Delivery date</th><th>Stage</th><th>Commission</th></tr></thead>
+    <tbody>
+      {% for deal in deals %}
+      <tr>
+        <td>#{{ deal.id }}</td>
+        <td>{{ deal.lead.name }}</td>
+        <td>{{ deal.package }}</td>
+        <td>{{ deal.delivery_date or "TBD" }}</td>
+        <td><span class="tag">{{ deal.stage }}</span></td>
+        <td>
+          {% if deal.commission_cents is not none %}
+          ${{ "%.2f"|format(deal.commission_cents / 100) }}
+          {% else %}
+          <span style="color: var(--muted);">not yet earned</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">No deals assigned to this closer.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

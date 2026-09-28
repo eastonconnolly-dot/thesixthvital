@@ -1,0 +1,74 @@
+{% extends "admin/base.html" %}
+{% block title %}Closers{% endblock %}
+{% block content %}
+<h1>Closers</h1>
+
+<div class="card">
+  <h2 style="margin-top:0;">Add a closer</h2>
+  <form method="post" action="{{ url_for('closers.create_closer') }}" style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin:0;">
+    <div style="flex:1; min-width:160px;">
+      <label for="name">Name</label>
+      <input id="name" name="name" type="text" required />
+    </div>
+    <div style="flex:1; min-width:200px;">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" required />
+    </div>
+    <div style="width:140px;">
+      <label for="commission_rate">Commission (0-1)</label>
+      <input id="commission_rate" name="commission_rate" type="number" step="0.01" min="0" max="1" value="0.10" required />
+    </div>
+    <button class="btn" type="submit" style="margin-bottom:12px;">Add closer</button>
+  </form>
+</div>
+
+<div class="card">
+  <table>
+    <thead><tr><th>Name</th><th>Email</th><th>Commission</th><th>Active</th><th>Deals</th><th></th></tr></thead>
+    <tbody>
+      {% for closer in closers %}
+      <tr>
+        <td>{{ closer.name }}</td>
+        <td>{{ closer.email }}</td>
+        <td>{{ "%.0f%%"|format(closer.commission_rate * 100) }}</td>
+        <td>{{ "Yes" if closer.active else "No" }}</td>
+        <td>{{ closer.deals|length }}</td>
+        <td><a class="btn" href="{{ url_for('closers.calendar', closer_id=closer.id) }}">Calendar</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">No closers yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h1>Unassigned Deals</h1>
+<div class="card">
+  <table>
+    <thead><tr><th>Deal</th><th>Lead</th><th>Package</th><th>Stage</th><th>Amount</th><th>Assign</th></tr></thead>
+    <tbody>
+      {% for deal in unassigned_deals %}
+      <tr>
+        <td>#{{ deal.id }}</td>
+        <td>{{ deal.lead.name }}</td>
+        <td>{{ deal.package }}</td>
+        <td><span class="tag">{{ deal.stage }}</span></td>
+        <td>${{ "%.2f"|format(deal.amount_cents / 100) }}</td>
+        <td>
+          <form method="post" action="{{ url_for('closers.assign_closer', deal_id=deal.id) }}" style="display:flex; gap:6px; align-items:center; margin:0;">
+            <select name="closer_id" style="width:auto; margin:0;" {% if not closers %}disabled{% endif %}>
+              {% for closer in closers %}
+              <option value="{{ closer.id }}">{{ closer.name }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn" type="submit" {% if not closers %}disabled{% endif %}>Assign</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">No unassigned deals.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+{% block title %}New call intake{% endblock %}
+{% block content %}
+<h1>Call-to-proposal</h1>
+<div class="card">
+  <p style="color:var(--muted); font-size:0.9rem; margin-top:0;">
+    Paste the discovery-call transcript below. Claude will extract the package, delivery
+    date, participants, and any special terms, then generate the proposal PDF, e-sign
+    request, and Stripe deposit link automatically — nothing goes out until you approve it
+    on the next screen (or it auto-sends after 2 hours untouched).
+  </p>
+  <form method="post" action="{{ url_for('call_intake.create') }}">
+    <label for="lead_id">Lead</label>
+    <select name="lead_id" id="lead_id" required>
+      <option value="">Select a lead…</option>
+      {% for lead in leads %}
+      <option value="{{ lead.id }}">{{ lead.name }} — {{ lead.email }}{% if lead.org %} ({{ lead.org }}){% endif %}</option>
+      {% endfor %}
+    </select>
+
+    <label for="deal_id">Existing deal (optional — leave blank to open a new one)</label>
+    <input type="number" name="deal_id" id="deal_id" placeholder="Deal ID" />
+
+    <label for="transcript">Call transcript</label>
+    <textarea name="transcript" id="transcript" rows="16" required style="width:100%; font:inherit; padding:10px; border-radius:6px; border:1px solid var(--border);" placeholder="Paste the full discovery-call transcript here…"></textarea>
+
+    <div style="margin-top:16px;">
+      <button class="btn" type="submit">Generate proposal from this call</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

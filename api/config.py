@@ -85,6 +85,22 @@ class Config:
     BACKUP_BUCKET = os.environ.get("BACKUP_BUCKET", "")
     BACKUP_S3_ENDPOINT_URL = os.environ.get("BACKUP_S3_ENDPOINT_URL", "")  # non-AWS S3-compatible (R2, Backblaze, etc.); blank = real AWS S3
 
+    # ── Phase 6: founder-off-the-loop onboarding / post-delivery automation ──
+    # Local-disk baseline-video upload storage (services/onboarding.py,
+    # routes/uploads.py). Swap for an S3-compatible bucket later -- see
+    # api/INTEGRATION.md's "known limitations" section.
+    UPLOAD_STORAGE_DIR = os.environ.get(
+        "UPLOAD_STORAGE_DIR", os.path.join(os.path.dirname(__file__), "uploads")
+    )
+    UPLOAD_MAX_BYTES = int(os.environ.get("UPLOAD_MAX_BYTES", str(500 * 1024 * 1024)))  # 500MB
+    UPLOAD_ALLOWED_EXTENSIONS = {"mp4", "mov", "webm"}
+
+    # Badge print order destination -- the "local vendor's email order"
+    # option from the Phase 6 brief (no print-vendor API key needed). A real
+    # API-based vendor (Printful/Gelato) is a documented future option in
+    # services/print_vendor.py, not built here.
+    PRINT_VENDOR_EMAIL = os.environ.get("PRINT_VENDOR_EMAIL", "")
+
     # ── Hub tenant sync (see HUB_INTEGRATION.md) ──────────────────────────
     # RPSAS's leads/deals still live in this app's own DB (leads/deals below
     # aren't going anywhere) -- this pushes a copy into the Hub as a real

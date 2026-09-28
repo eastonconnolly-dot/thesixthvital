@@ -1,0 +1,98 @@
+{% extends "admin/base.html" %}
+{% block title %}Delivery — Deal #{{ deal.id }}{% endblock %}
+{% block content %}
+<h1>{{ lead.name }} — Session delivery</h1>
+
+{% if deal.delivered_at %}
+<div class="card">
+  <p><strong>Delivered:</strong> {{ deal.delivered_at.strftime("%b %d, %Y") }}</p>
+  <p>This session has already been marked complete. Scorecards, consent
+  requests, Practice seats, and follow-ups have all been sent.</p>
+</div>
+
+<h1>Testimonials</h1>
+<div class="card">
+  <table>
+    <thead><tr><th>Participant</th><th>Responded</th><th>Granted</th><th>Text</th><th>Approved</th><th></th></tr></thead>
+    <tbody>
+      {% for t in testimonials %}
+      <tr>
+        <td>{{ t.participant_name }}</td>
+        <td>{{ t.responded_at.strftime("%b %d, %Y") if t.responded_at else "Pending" }}</td>
+        <td>{{ "Yes" if t.granted else ("No" if t.granted is not none else "—") }}</td>
+        <td>{{ t.response_text or "—" }}</td>
+        <td>{{ "Yes" if t.approved else "No" }}</td>
+        <td>
+          {% if t.granted and not t.approved %}
+          <form method="post" action="{{ url_for('delivery.approve_testimonial', consent_id=t.id) }}" style="margin:0;">
+            <button class="btn" type="submit">Approve for Proof page</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">No testimonial responses yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+<div class="card">
+  <p>Mark this session complete once delivery has happened: enter each
+  participant's baseline and final scores on the 5-dimension rubric.
+  Scorecards, testimonial/clip-consent requests, Practice seats, and
+  follow-up scheduling all fire automatically on submit.</p>
+
+  <form method="post" action="{{ url_for('delivery.complete', deal_id=deal.id) }}" id="deliveryForm">
+    <label for="session_date">Session date</label>
+    <input type="date" id="session_date" name="session_date" required />
+
+    <label for="session_type">Session type</label>
+    <input type="text" id="session_type" name="session_type" placeholder="e.g. intensive_day_1" value="intensive" />
+
+    <div id="participants"></div>
+
+    <button type="button" class="btn" id="addParticipantBtn" style="margin-top:8px; margin-bottom:16px;">+ Add participant</button>
+    <div>
+      <button type="submit" class="btn">Mark session complete</button>
+    </div>
+  </form>
+</div>
+{% endif %}
+
+<script>
+  const dimensions = {{ dimensions|list|tojson }};
+  const container = document.getElementById('participants');
+  let count = 0;
+
+  function addParticipant() {
+    const i = count++;
+    const wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.style.marginBottom = '12px';
+
+    let dimFields = '';
+    dimensions.forEach(dim => {
+      dimFields += `
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+          <span style="width:120px; font-size:0.85rem;">${dim}</span>
+          <input type="number" min="1" max="5" name="baseline_${dim}_${i}" placeholder="Baseline 1-5" style="margin:0;" required />
+          <input type="number" min="1" max="5" name="final_${dim}_${i}" placeholder="Final 1-5" style="margin:0;" required />
+        </div>`;
+    });
+
+    wrap.innerHTML = `
+      <label>Participant name</label>
+      <input type="text" name="participant_name" required />
+      <label>Participant email</label>
+      <input type="email" name="participant_email" required />
+      ${dimFields}
+    `;
+    container.appendChild(wrap);
+  }
+
+  document.getElementById('addParticipantBtn').addEventListener('click', addParticipant);
+  addParticipant();
+</script>
+{% endblock %}

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Refer a colleague — {{ config.BRAND_NAME }}</title>
+  <style>
+    :root { --ink:#17263B; --ivory:#F4EFE6; --amber:#E0A458; --muted:#8A97A8; --border:#d9d3c6; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--ivory); color:var(--ink); }
+    main { max-width:480px; margin:0 auto; padding:64px 24px; text-align:center; }
+    h1 { font-family: Georgia, serif; font-size:1.5rem; }
+    .card { background:#fff; border-radius:12px; padding:28px; box-shadow:0 4px 16px rgba(23,38,59,0.08); }
+    p { color:var(--muted); }
+    .btn { display:inline-block; margin-top:18px; padding:10px 20px; border-radius:8px; background:var(--amber); color:var(--ink); text-decoration:none; font-weight:600; font-size:0.95rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Thanks for thinking of us, {{ lead.name.split(" ")[0] if lead.name else "" }}</h1>
+    <div class="card">
+      <p>Know a colleague who'd benefit from {{ config.BRAND_NAME }}? Send them
+      our way and we'll take great care of them.</p>
+      <a class="btn" href="{{ config.SITE_BASE_URL }}/apply.html">Send them to apply</a>
+    </div>
+  </main>
+</body>
+</html>

@@ -3,7 +3,7 @@ from datetime import date
 from flask import Blueprint, jsonify, request, send_file, current_app
 
 from extensions import db
-from models import Application, Deal, EncounterSession, Lead, Scorecard, TRACKS
+from models import Application, ConsentRequest, Deal, EncounterSession, Lead, Scorecard, TRACKS
 from services.qualify import score_application
 from services.pdf.badge import render_badge_pdf, render_badge_png
 from services.pdf.scorecard import render_cohort_scorecard_pdf, render_scorecard_pdf
@@ -78,7 +78,19 @@ def public_proof():
         {"value": str(participants_count), "label": "Participants scored"},
         {"value": str(programs_count), "label": "Programs enrolled"},
     ]
-    return jsonify({"stats": stats, "testimonials": []})
+    approved = (
+        ConsentRequest.query
+        .filter_by(kind="testimonial", granted=True, approved=True)
+        .filter(ConsentRequest.response_text.isnot(None))
+        .order_by(ConsentRequest.responded_at.desc())
+        .limit(12)
+        .all()
+    )
+    testimonials = [
+        {"quote": c.response_text, "attribution": c.participant_name or "RPSAS participant"}
+        for c in approved
+    ]
+    return jsonify({"stats": stats, "testimonials": testimonials})
 
 
 @bp.get("/badge/<int:participant_id>.pdf")

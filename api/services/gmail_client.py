@@ -3,6 +3,8 @@ and thread-aware sending. Every send should be logged to the messages table
 by the caller (see routes/public.py, outreach/engine)."""
 
 import base64
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from flask import current_app
@@ -25,11 +27,26 @@ def _footer_html(unsubscribe_url):
     )
 
 
-def send_email(to_email, subject, html_body, unsubscribe_url, thread_id=None, in_reply_to=None):
+def send_email(to_email, subject, html_body, unsubscribe_url, thread_id=None, in_reply_to=None, attachments=None):
     """Returns {"message_id": str, "thread_id": str}. thread_id/in_reply_to
-    let a sequence step reply into the same Gmail thread."""
+    let a sequence step reply into the same Gmail thread.
+
+    `attachments` (added for Phase 6 scorecard/badge PDF delivery): optional
+    list of (filename, bytes, mimetype) tuples. Omit/None keeps the message
+    a plain MIMEText, unchanged from before this was added."""
     full_html = html_body + _footer_html(unsubscribe_url)
-    msg = MIMEText(full_html, "html")
+
+    if attachments:
+        msg = MIMEMultipart()
+        msg.attach(MIMEText(full_html, "html"))
+        for filename, data, mimetype in attachments:
+            maintype, _, subtype = (mimetype or "application/octet-stream").partition("/")
+            part = MIMEApplication(data, _subtype=subtype or "octet-stream")
+            part.add_header("Content-Disposition", "attachment", filename=filename)
+            msg.attach(part)
+    else:
+        msg = MIMEText(full_html, "html")
+
     msg["To"] = to_email
     msg["From"] = current_app.config["GMAIL_SENDER_EMAIL"]
     msg["Subject"] = subject

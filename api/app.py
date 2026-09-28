@@ -23,6 +23,14 @@ def create_app(config_object=Config):
     from routes.content_admin import bp as content_admin_bp
     from routes.inbox import bp as inbox_bp
     from routes.unsubscribe import bp as unsubscribe_bp
+    from routes.playbook import bp as playbook_bp
+    from routes.closers import bp as closers_bp
+    from routes.qualifier import bp as qualifier_bp
+    from routes.call_intake import bp as call_intake_bp
+    from routes.delivery import bp as delivery_bp
+    from routes.intake import bp as intake_bp
+    from routes.uploads import bp as uploads_bp
+    from routes.consent import bp as consent_bp
 
     app.register_blueprint(public_bp)
     app.register_blueprint(admin_bp)
@@ -32,6 +40,14 @@ def create_app(config_object=Config):
     app.register_blueprint(content_admin_bp)
     app.register_blueprint(inbox_bp)
     app.register_blueprint(unsubscribe_bp)
+    app.register_blueprint(playbook_bp)
+    app.register_blueprint(closers_bp)
+    app.register_blueprint(qualifier_bp)
+    app.register_blueprint(call_intake_bp)
+    app.register_blueprint(delivery_bp)
+    app.register_blueprint(intake_bp)
+    app.register_blueprint(uploads_bp)
+    app.register_blueprint(consent_bp)
 
     register_cli(app)
 
@@ -137,6 +153,87 @@ def register_cli(app):
                 try:
                     from ops.error_alerts import alert
                     alert("Sequence tick failed", str(e))
+                except Exception:
+                    pass
+                raise
+
+    @app.cli.command("auto-approve-proposals")
+    def auto_approve_proposals_cmd():
+        """Phase 6 call-to-proposal safety net: approves any Deal still
+        `proposal_pending_review` more than 2 hours after
+        `proposal_pending_since` (the founder's one-click approval window).
+        See services/call_to_proposal.py::sweep_auto_approve() and
+        api/INTEGRATION.md for the render.yaml cron entry."""
+        from services.call_to_proposal import sweep_auto_approve
+
+        with app.app_context():
+            try:
+                result = sweep_auto_approve()
+                print(f"Auto-approved proposals: {result}")
+            except Exception as e:
+                try:
+                    from ops.error_alerts import alert
+                    alert("Proposal auto-approve sweep failed", str(e))
+                except Exception:
+                    pass
+                raise
+
+    @app.cli.command("check-content-inventory")
+    def check_content_inventory_cmd():
+        """Phase 6 content-on-inventory: estimates days of scheduled
+        LinkedIn content remaining and alerts FOUNDER_EMAIL (once per
+        drop-below-30-days event) if it's running low. See
+        services/content_inventory.py::check_inventory_and_alert() and this
+        repo's top-level INTEGRATION.md for the render.yaml cron entry."""
+        from services.content_inventory import check_inventory_and_alert
+
+        with app.app_context():
+            try:
+                result = check_inventory_and_alert()
+                print(f"Content inventory check: {result}")
+            except Exception as e:
+                try:
+                    from ops.error_alerts import alert
+                    alert("Content inventory check failed", str(e))
+                except Exception:
+                    pass
+                raise
+
+    @app.cli.command("send-delivery-reminders")
+    def send_delivery_reminders_cmd():
+        """Sends the 7/3/1-day-before-delivery reminder chain for deals with
+        a delivery_date. See services/onboarding.py::send_delivery_reminders.
+        Scheduled daily via render.yaml (see api/INTEGRATION.md)."""
+        from services.onboarding import send_delivery_reminders
+
+        with app.app_context():
+            try:
+                result = send_delivery_reminders()
+                print(f"Delivery reminders: {result}")
+            except Exception as e:
+                try:
+                    from ops.error_alerts import alert
+                    alert("Delivery reminder sweep failed", str(e))
+                except Exception:
+                    pass
+                raise
+
+    @app.cli.command("send-scheduled-followups")
+    def send_scheduled_followups_cmd():
+        """Sends whatever's due from the post-delivery followup schedule
+        (30-day check-in confirmation, day-7 referral ask). See
+        services/delivery.py::send_scheduled_followups. Scheduled daily via
+        render.yaml (see api/INTEGRATION.md)."""
+        from services.delivery import send_scheduled_followups
+
+        with app.app_context():
+            try:
+                result = send_scheduled_followups()
+                print(f"Scheduled followups: {result}")
+            except Exception as e:
+                try:
+                    from ops.error_alerts import alert
+                    alert("Scheduled followup sweep failed", str(e))
                 except Exception:
                     pass
                 raise

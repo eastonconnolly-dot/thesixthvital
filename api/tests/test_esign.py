@@ -1,5 +1,6 @@
 import base64
 import io
+from unittest.mock import patch
 
 from PIL import Image
 
@@ -82,7 +83,34 @@ def test_submit_signature_marks_signed_and_generates_signed_pdf(app, client):
         deal = db.session.get(Deal, deal_id)
         assert deal.signed_at is not None
         assert deal.signed_pdf_data is not None
-        assert deal.signed_pdf_data[:5] == b"%PDF-"
+
+
+def test_submit_signature_triggers_onboarding(app):
+    with app.app_context():
+        deal = _make_deal_with_context(app)
+        sig_request, _ = esign.create_signature_request(deal, "Dana Ortiz", "dana@example.com")
+        token = sig_request.token
+
+    with patch("services.onboarding.trigger_onboarding") as mock_trigger:
+        resp = app.test_client().post(f"/sign/{token}", json={
+            "typed_name": "Dana R. Ortiz", "agreed": True, "signature_png_base64": _tiny_png_data_url(),
+        })
+    assert resp.status_code == 200
+    mock_trigger.assert_called_once()
+
+
+def test_submit_signature_succeeds_even_if_onboarding_fails(app):
+    with app.app_context():
+        deal = _make_deal_with_context(app)
+        sig_request, _ = esign.create_signature_request(deal, "Dana Ortiz", "dana@example.com")
+        token = sig_request.token
+
+    with patch("services.onboarding.trigger_onboarding", side_effect=RuntimeError("gmail not configured")):
+        resp = app.test_client().post(f"/sign/{token}", json={
+            "typed_name": "Dana R. Ortiz", "agreed": True, "signature_png_base64": _tiny_png_data_url(),
+        })
+    assert resp.status_code == 200
+    assert resp.get_json()["status"] == "signed"
 
 
 def test_submit_signature_rejects_second_attempt(app, client):

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ "Testimonial" if consent.kind == "testimonial" else "Clip consent" }} — {{ config.BRAND_NAME }}</title>
+  <style>
+    :root { --ink:#17263B; --ivory:#F4EFE6; --amber:#E0A458; --muted:#8A97A8; --border:#d9d3c6; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--ivory); color:var(--ink); }
+    main { max-width:480px; margin:0 auto; padding:64px 24px; }
+    h1 { font-family: Georgia, serif; font-size:1.5rem; }
+    .card { background:#fff; border-radius:12px; padding:28px; box-shadow:0 4px 16px rgba(23,38,59,0.08); }
+    label { font-size:0.85rem; font-weight:600; display:block; margin:14px 0 6px; }
+    textarea { width:100%; padding:9px 10px; border-radius:6px; border:1px solid var(--border); font:inherit; min-height:90px; resize:vertical; }
+    .choice { display:flex; gap:16px; margin-top:14px; }
+    .choice label { display:flex; align-items:center; gap:6px; font-weight:400; }
+    .choice input { width:auto; }
+    .btn { display:inline-block; margin-top:18px; padding:10px 20px; border-radius:8px; background:var(--amber); color:var(--ink); border:none; font-weight:600; cursor:pointer; font-size:0.95rem; }
+    .msg { padding:10px 14px; border-radius:8px; font-size:0.9rem; margin-bottom:14px; }
+    .msg.ok { background:#e3f3e8; color:#2f7a4f; }
+    .msg.err { background:#fbe4e4; color:#a83a3a; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>{{ "Share a testimonial?" if consent.kind == "testimonial" else "Clip consent" }}</h1>
+    <div class="card">
+      {% if error %}<div class="msg err">{{ error }}</div>{% endif %}
+      {% if just_responded %}
+        <div class="msg ok">Thanks — your response has been recorded.</div>
+      {% elif already_responded %}
+        <div class="msg ok">You've already responded to this request. Thank you.</div>
+      {% else %}
+      <form method="post">
+        <div class="choice">
+          <label><input type="radio" name="granted" value="yes" required /> Yes</label>
+          <label><input type="radio" name="granted" value="no" required /> No</label>
+        </div>
+        {% if consent.kind == "testimonial" %}
+        <label for="response_text">Your testimonial (optional if declining)</label>
+        <textarea id="response_text" name="response_text" placeholder="A couple of sentences about your experience..."></textarea>
+        {% endif %}
+        <button type="submit" class="btn">Submit</button>
+      </form>
+      {% endif %}
+    </div>
+  </main>
+</body>
+</html>

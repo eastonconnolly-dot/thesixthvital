@@ -1,0 +1,45 @@
+{% extends "admin/base.html" %}
+{% block title %}Review call proposal{% endblock %}
+{% block content %}
+<h1>{{ lead.name }} — {{ package_label }}</h1>
+
+{% if deal.proposal_pending_review %}
+<div class="flash" style="background:#fdf0dc; color:#8a6416;">
+  Pending review — this will auto-send in 2 hours if left untouched.
+</div>
+{% else %}
+<div class="flash flash-success">Already approved and active.</div>
+{% endif %}
+
+<div class="card">
+  <p><strong>Package:</strong> {{ package_label }}</p>
+  <p><strong>Amount:</strong> ${{ "%.2f"|format(deal.amount_cents / 100) }}</p>
+  <p><strong>Delivery date:</strong> {{ deal.delivery_date or "TBD" }}</p>
+  <p><strong>Deposit link:</strong> <a href="{{ deal.proposal_context.deposit_link }}">{{ deal.proposal_context.deposit_link }}</a></p>
+  {% if deal.signature_requests %}
+    {% set latest = deal.signature_requests[-1] %}
+    <p><strong>Sign link:</strong> <a href="{{ request.url_root.rstrip('/') }}/sign/{{ latest.token }}">{{ request.url_root.rstrip('/') }}/sign/{{ latest.token }}</a> ({{ latest.status }})</p>
+  {% endif %}
+
+  {% set participants = deal.proposal_context.participants or [] %}
+  <p><strong>Participants:</strong>
+    {% if participants %}
+      {{ participants | map(attribute="name") | join(", ") }}
+    {% else %}
+      — none extracted —
+    {% endif %}
+  </p>
+  <p><strong>Special terms:</strong> {{ deal.proposal_context.special_terms or "— none —" }}</p>
+
+  {% if deal.proposal_pending_review %}
+  <form method="post" action="{{ url_for('call_intake.approve', deal_id=deal.id) }}">
+    <button class="btn" type="submit">Approve &amp; activate now</button>
+  </form>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0;">Proposal preview</h2>
+  <iframe src="{{ url_for('call_intake.preview_pdf', deal_id=deal.id) }}" style="width:100%; height:600px; border:1px solid var(--border); border-radius:8px;"></iframe>
+</div>
+{% endblock %}

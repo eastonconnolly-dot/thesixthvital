@@ -84,6 +84,15 @@ services:
       - key: HUB_PIPELINE_KEY_PROGRAM
         sync: false
 
+      # Phase 6 — founder off the loop
+      - key: FOUNDER_EMAIL
+        sync: false
+      - key: PRINT_VENDOR_EMAIL
+        sync: false
+      # UPLOAD_STORAGE_DIR intentionally not set here — defaults to local disk
+      # under api/, which is ephemeral on Render. Swap for an S3-compatible
+      # bucket before relying on this in production (see api/INTEGRATION.md).
+
   - type: cron
     name: rpsas-weekly-digest
     runtime: python
@@ -212,3 +221,107 @@ services:
         sync: false
       - key: CLAUDE_MODEL
         value: claude-sonnet-5
+
+  - type: cron
+    name: rpsas-auto-approve-proposals
+    runtime: python
+    plan: free
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask auto-approve-proposals
+    schedule: "*/15 * * * *" # every 15 min -- guards a 2-hour founder-approval window, see api/INTEGRATION.md
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rpsas-db
+          property: connectionString
+      - key: BRAND_NAME
+        value: RPSAS
+      - key: FOUNDER_EMAIL
+        sync: false
+      - key: GMAIL_SENDER_EMAIL
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_JSON
+        sync: false
+      - key: GOOGLE_TOKEN_JSON
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+
+  - type: cron
+    name: rpsas-check-content-inventory
+    runtime: python
+    plan: free
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask check-content-inventory
+    schedule: "0 13 * * 1" # Monday 1pm UTC (weekly) -- adjust for the founder's actual timezone
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rpsas-db
+          property: connectionString
+      - key: BRAND_NAME
+        value: RPSAS
+      - key: FOUNDER_EMAIL
+        sync: false
+      - key: GMAIL_SENDER_EMAIL
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_JSON
+        sync: false
+      - key: GOOGLE_TOKEN_JSON
+        sync: false
+
+  - type: cron
+    name: rpsas-delivery-reminders
+    runtime: python
+    plan: free
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask send-delivery-reminders
+    schedule: "0 14 * * *" # daily, 2pm UTC -- the 7/3/1-day-before-delivery reminder chain
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rpsas-db
+          property: connectionString
+      - key: BRAND_NAME
+        value: RPSAS
+      - key: FOUNDER_EMAIL
+        sync: false
+      - key: GMAIL_SENDER_EMAIL
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_JSON
+        sync: false
+      - key: GOOGLE_TOKEN_JSON
+        sync: false
+      - key: SITE_BASE_URL
+        sync: false
+      - key: API_BASE_URL
+        sync: false
+
+  - type: cron
+    name: rpsas-scheduled-followups
+    runtime: python
+    plan: free
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask send-scheduled-followups
+    schedule: "0 15 * * *" # daily, 3pm UTC -- 30-day check-in confirmation + day-7 referral ask
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rpsas-db
+          property: connectionString
+      - key: BRAND_NAME
+        value: RPSAS
+      - key: FOUNDER_EMAIL
+        sync: false
+      - key: GMAIL_SENDER_EMAIL
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_JSON
+        sync: false
+      - key: GOOGLE_TOKEN_JSON
+        sync: false
+      - key: API_BASE_URL
+        sync: false
