@@ -1,11 +1,10 @@
-<svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="badgeTitle">
+<svg viewBox="0 0 720 420" width="720" height="420" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="badgeTitle">
   <title id="badgeTitle">The RPSAS Method: Read, Pick, Speak, Ask, Shift</title>
   <defs>
     <style>
       .card { fill: var(--ink, #0B0B0B); }
       .word { font-family: 'Source Sans 3', sans-serif; font-weight: 600; font-size: 15px; letter-spacing: 0.14em; text-transform: uppercase; fill: var(--red, #E4573D); }
       .letter { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 64px; fill: var(--ivory, #F4EFE6); }
-      .sub { font-family: 'Source Sans 3', sans-serif; font-weight: 500; font-size: 12px; fill: var(--muted, #9C9A92); }
       .rail { stroke: var(--red, #E4573D); stroke-width: 2; opacity: 0.65; }
       .method { font-family: 'Source Sans 3', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; fill: var(--ivory, #F4EFE6); }
     </style>
@@ -13,41 +12,36 @@
 
   <rect class="card" x="0" y="0" width="720" height="420" rx="24" />
 
-  <line class="rail" x1="70" y1="380" x2="650" y2="50" />
+  <line class="rail" x1="130" y1="350" x2="590" y2="130" />
 
   <!-- READ -->
-  <g transform="translate(70,380)">
+  <g transform="translate(130,350)">
     <text class="word" x="0" y="-96" text-anchor="middle">Read</text>
     <text class="letter" x="0" y="-30" text-anchor="middle">R</text>
-    <text class="sub" x="0" y="14" text-anchor="middle">Room · Emotion · Angle · Desire</text>
   </g>
 
   <!-- PICK -->
-  <g transform="translate(215,297)">
+  <g transform="translate(245,295)">
     <text class="word" x="0" y="-96" text-anchor="middle">Pick</text>
     <text class="letter" x="0" y="-30" text-anchor="middle">P</text>
-    <text class="sub" x="0" y="14" text-anchor="middle">Proof · Plan · Permission · Power</text>
   </g>
 
   <!-- SPEAK -->
-  <g transform="translate(360,215)">
+  <g transform="translate(360,240)">
     <text class="word" x="0" y="-96" text-anchor="middle">Speak</text>
     <text class="letter" x="0" y="-30" text-anchor="middle">S</text>
-    <text class="sub" x="0" y="14" text-anchor="middle">Sit · Pace · Eyes · Air · Kill fillers</text>
   </g>
 
   <!-- ASK -->
-  <g transform="translate(505,133)">
+  <g transform="translate(475,185)">
     <text class="word" x="0" y="-96" text-anchor="middle">Ask</text>
     <text class="letter" x="0" y="-30" text-anchor="middle">A</text>
-    <text class="sub" x="0" y="14" text-anchor="middle">Acknowledge · Stop · Know</text>
   </g>
 
   <!-- SHIFT -->
-  <g transform="translate(650,50)">
+  <g transform="translate(590,130)">
     <text class="word" x="0" y="-96" text-anchor="middle">Shift</text>
     <text class="letter" x="0" y="-30" text-anchor="middle">S</text>
-    <text class="sub" x="0" y="14" text-anchor="middle">See · Hold · Identify · Flip · Test</text>
   </g>
 
   <text class="method" x="360" y="404" text-anchor="middle">RPSAS METHOD</text>

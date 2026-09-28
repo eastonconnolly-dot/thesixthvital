@@ -1,6 +1,9 @@
 """CR80 badge — the RPSAS Method wordmark, letters rising bottom-left to
-top-right with a word above each letter and sub-words in a horizontal row
-beneath it. Print-ready PDF (with bleed) plus a PNG for the lead magnet.
+top-right with a word above each letter. Deliberately doesn't spell out
+the sub-words behind each letter (Room/Emotion/Angle/Desire, etc.) --
+that breakdown is what the actual training teaches, not something to
+give away on a badge. Print-ready PDF (with bleed) plus a PNG for the
+lead magnet.
 
 Colored on its own true-black/signal-red card (see BADGE_* below) rather
 than the shared INK/AMBER/IVORY/MUTED constants from .base -- the badge is
@@ -29,11 +32,11 @@ PAGE_W = CARD_W + 2 * BLEED
 PAGE_H = CARD_H + 2 * BLEED
 
 LETTERS = [
-    ("READ", "R", "Room · Emotion · Angle · Desire"),
-    ("PICK", "P", "Proof · Plan · Permission · Power"),
-    ("SPEAK", "S", "Sit · Pace · Eyes · Air · Kill fillers"),
-    ("ASK", "A", "Acknowledge · Stop · Know"),
-    ("SHIFT", "S", "See · Hold · Identify · Flip · Test"),
+    ("READ", "R"),
+    ("PICK", "P"),
+    ("SPEAK", "S"),
+    ("ASK", "A"),
+    ("SHIFT", "S"),
 ]
 
 
@@ -60,18 +63,14 @@ def render_badge_pdf(participant_name=None):
     c.setLineWidth(1.2)
     c.line(points[0][0], points[0][1], points[-1][0], points[-1][1])
 
-    for (word, letter, subwords), (x, y) in zip(LETTERS, points):
+    for (word, letter), (x, y) in zip(LETTERS, points):
         c.setFillColor(BADGE_RED)
         c.setFont(BODY_FONT_BOLD, 6)
-        c.drawCentredString(x, y + 0.34 * inch, word)
+        c.drawCentredString(x, y + 0.3 * inch, word)
 
         c.setFillColor(BADGE_IVORY)
-        c.setFont(DISPLAY_FONT, 22)
+        c.setFont(DISPLAY_FONT, 24)
         c.drawCentredString(x, y - 0.06 * inch, letter)
-
-        c.setFillColor(BADGE_MUTED)
-        c.setFont(BODY_FONT, 4.6)
-        c.drawCentredString(x, y - 0.22 * inch, subwords)
 
     c.setFillColor(BADGE_IVORY)
     c.setFont(BODY_FONT_BOLD, 7)
@@ -110,10 +109,9 @@ def render_badge_png(participant_name=None, scale=4):
 
     draw.line([points[0], points[-1]], fill="#E4573D", width=2)
 
-    for (word, letter, subwords), (x, y) in zip(LETTERS, points):
+    for (word, letter), (x, y) in zip(LETTERS, points):
         draw.text((x, y - 34), word, fill="#E4573D", font=font(11), anchor="mm")
-        draw.text((x, y), letter, fill="#F4EFE6", font=font(46), anchor="mm")
-        draw.text((x, y + 28), subwords, fill="#9C9A92", font=font(9), anchor="mm")
+        draw.text((x, y), letter, fill="#F4EFE6", font=font(50), anchor="mm")
 
     draw.text((w / 2, h - 14), "RPSAS METHOD", fill="#F4EFE6", font=font(12), anchor="mm")
     if participant_name:

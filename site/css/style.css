@@ -236,13 +236,6 @@ section.tight { padding: 56px 0; }
   line-height: 1;
 }
 .method-word { font-weight: 600; margin-bottom: 0.3em; }
-.method-sub {
-  color: var(--fg-muted);
-  font-size: 0.92rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 0.6em;
-}
 
 /* Package cards */
 .pkg-card {
