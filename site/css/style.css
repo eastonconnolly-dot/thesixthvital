@@ -149,7 +149,7 @@ section.tight { padding: 56px 0; }
 
 .hero {
   position: relative;
-  padding: 180px 0 130px;
+  padding: 90px 0 110px;
   border-bottom: 1px solid var(--border);
   overflow: hidden;
 }
