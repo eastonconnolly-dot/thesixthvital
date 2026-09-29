@@ -60,7 +60,7 @@ class Config:
     PRACTICE_TRIAL_DAYS = 7
 
     COMPANY_MAILING_ADDRESS = os.environ.get(
-        "COMPANY_MAILING_ADDRESS", "123 Main Street, Suite 100, Spokane, WA 99201"
+        "COMPANY_MAILING_ADDRESS", "522 W Riverside Ave, Ste N, Spokane, WA 99201"
     )
     SITE_BASE_URL = os.environ.get("SITE_BASE_URL", "http://localhost:8010")
     API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:5000")

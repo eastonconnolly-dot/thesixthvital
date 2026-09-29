@@ -130,10 +130,9 @@ than a third-party vendor.
 
 `site/privacy.html` and `site/terms.html` are workable starting drafts, not
 reviewed by counsel — flagged as such on the pages themselves. The mailing
-address/contact email across the site and PDFs are placeholders
-(`123 Main Street, Suite 100, Spokane, WA 99201` / `hello@rpsas.example.com`)
-— update `COMPANY_MAILING_ADDRESS` and the site's hardcoded footer/contact
-strings once you have real ones.
+address and contact email across the site and PDFs are real
+(`522 W Riverside Ave, Ste N, Spokane, WA 99201` / `hello@thesixthvital.com`,
+set via `COMPANY_MAILING_ADDRESS`) — update both places if either changes.
 
 Badge/scorecard/proposal PDFs use ReportLab's built-in Times-Roman/Helvetica
 as stand-ins for Playfair Display/Source Sans 3 — no font files were
