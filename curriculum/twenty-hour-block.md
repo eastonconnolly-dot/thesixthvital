@@ -65,7 +65,10 @@ across all four.
 ## Block F — Integration, final encounter, close (4h)
 
 Two or three full integrated encounters first (everything together, mixed
-scenarios), then the filmed final encounter, then score and compare live
-— same guarantee checkpoint as every other script (6-point lift or
-continue at no charge). Close with the one-page personal playbook, badge,
-scorecard PDF, and Practice app access.
+scenarios), then the filmed final encounter, then score and compare live.
+This package isn't covered by the 6-point guarantee (see `programs.html`'s
+FAQ) — it's open-ended hours, not a fixed intensive structure — so frame
+the reveal as "here's the movement" rather than a guarantee checkpoint. If
+the lift is strong, ask for a testimonial on camera before they leave.
+Close with the one-page personal playbook, badge, scorecard PDF, and
+Practice app access.

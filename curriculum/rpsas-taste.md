@@ -69,4 +69,6 @@ close: "That's what one session does. A full intensive adds Ask, drills
 Shift properly instead of previewing it, and gets you a real guarantee on
 the number — and this $1,500 is fully credited toward it if you want to
 keep going." Don't oversell past that one line; let the tape and the
-number do the work.
+number do the work. Whether or not they upgrade on the spot, ask for a
+short on-camera testimonial before they leave — a real lift in one session
+is a strong enough result to be worth capturing on its own.

@@ -24,7 +24,10 @@ rubric as every other script; see `curriculum/README.md`.
 Rapport, confirm their situation from the brief specifically — most
 physicians book this because of one recurring type of conversation
 (breaking a diagnosis, family conflict, refusals). Name it back to them so
-they know you actually read the brief.
+they know you actually read the brief. Restate the guarantee explicitly:
+"We're scoring baseline to final on the same rubric, and if you're not at
+least 6 points up by tomorrow, we keep working until you are. This is
+already de-risked."
 
 **9:20–9:45 — Filmed baseline encounter**
 One encounter, cold. Pick whichever of the four scenarios most closely matches
@@ -133,5 +136,8 @@ One page, written with them: weakest dial, most common P-mode blind spot,
 one thing to drill before their next real hard conversation.
 
 **4:40–5:00 — Close**
-Badge, scorecard PDF, clip library, 90 days of Practice app access.
-Confirm the follow-up date if the guarantee is in play.
+Before logistics: ask for a testimonial on camera, right now, while the
+win is fresh — this converts far better in person than the automated
+follow-up email alone. Then badge, scorecard PDF, clip library, 90 days of
+Practice app access. Confirm the follow-up date if the guarantee is in
+play.

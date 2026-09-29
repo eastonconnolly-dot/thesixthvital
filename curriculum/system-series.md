@@ -68,4 +68,7 @@ With program leadership. Walk the full year's numbers — Month 1 baseline
 against Month 9 final, with the Month 7 mid-year point plotted between
 them so the trend is visible, not just the endpoints. This is the
 renewal conversation: what a second year would specifically address, based
-on real data from this one, not a generic pitch.
+on real data from this one, not a generic pitch. Ask directly for a
+year-in-review testimonial and a referral to a peer program — a full
+year of real numbers is the strongest proof this business has; don't let
+that ask wait for a follow-up email.

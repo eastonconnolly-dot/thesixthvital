@@ -73,4 +73,6 @@ Same format as the morning baseline, one at a time in front of the group.
 Group thank-you and a one-line explanation of what arrives next
 (scorecard, badge). Individual score comparisons happen 1:1, briefly, as
 people collect their things — don't read anyone's number out loud to the
-group.
+group. Ask anyone with a strong visible lift for a short on-camera
+testimonial as they leave — don't rely on the automated follow-up email
+alone.

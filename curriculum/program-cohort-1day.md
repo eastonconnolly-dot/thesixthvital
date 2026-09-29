@@ -32,7 +32,10 @@ yourself. The teaching blocks stay whole-group regardless of size.
 **9:00–9:20 — Group welcome**
 Introduce the day and the method to the full cohort. Explain the format:
 everyone gets filmed twice, the rest of the day is peer drilling with you
-circulating.
+circulating. Restate the guarantee to the group explicitly: everyone is
+scored baseline to final on the same rubric, and the program is covered by
+the 6-point lift guarantee — name it once, plainly, so nobody's wondering
+whether today is "just a workshop."
 
 **9:20–10:15 — Filmed baseline encounters**
 One at a time for small groups; parallel clusters for larger ones (see
@@ -70,4 +73,7 @@ Same format as the morning baseline block.
 **4:15–4:30 — Close**
 Group thank-you, explain what arrives next (individual scorecards, cohort
 summary for the program). Individual numbers stay 1:1 — don't read anyone's
-score to the group.
+score to the group. Before people leave, ask the program contact/sponsor
+directly for a short on-camera testimonial about the day, and 1:1 with any
+participant whose lift was visibly strong — don't rely on the automated
+email consent-request alone.

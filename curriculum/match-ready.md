@@ -29,7 +29,10 @@ Rapport first. Confirm their timeline and target programs out loud from the
 brief. Set expectations: "Today we build the four pieces. Tomorrow we add
 the fifth — the one that actually separates good from great — and film
 where you land." Show them the badge and explain the scorecard now, so they
-know what they're working toward.
+know what they're working toward. Restate the guarantee explicitly, out
+loud: "We're scoring baseline to final on the same rubric, and if you're
+not at least 6 points up by tomorrow, we keep working until you are. This
+is already de-risked — you're here to work, not to hope it works."
 
 **9:20–9:45 — Filmed baseline encounter**
 One `mmi_station` encounter, cold. No coaching, no warmup beyond the welcome. Pick
@@ -150,6 +153,10 @@ blind spot, one specific thing to drill before their real interview. This
 is what they actually keep and reread.
 
 **4:40–5:00 — Close**
-Explain what arrives next — badge, scorecard PDF, clip library, 90 days of
-Practice app access to keep drilling. If the guarantee is in play, confirm
-the follow-up date before they walk out the door.
+Before logistics: ask for a testimonial on camera, right now, while the
+win is fresh — "mind if I grab thirty seconds on what this was like?" This
+converts far better in person than the automated follow-up email ever
+will; don't rely on the email alone. Then explain what arrives next —
+badge, scorecard PDF, clip library, 90 days of Practice app access to keep
+drilling. If the guarantee is in play, confirm the follow-up date before
+they walk out the door.

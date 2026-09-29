@@ -81,4 +81,7 @@ program-track deals, the leadership-deck version of it (see
 not individuals: where did the group cluster low, which P-mode caused the
 most trouble, what would a follow-up engagement address. This is the
 moment that turns one cohort into a renewal or a referral to another
-program.
+program — ask directly, right here, while the results are in front of
+them: a program-level testimonial, and whether there's a peer program or
+department they'd introduce you to. Don't leave either ask for a
+follow-up email.
