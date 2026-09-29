@@ -70,9 +70,9 @@
           </fieldset>
 
           <div class="field">
-            <label for="org">Organization</label>
+            <label for="org" id="org-label">Organization</label>
             <input id="org" name="org" type="text" placeholder="Practice, hospital, or program name" />
-            <div class="hint">Leave blank if not applicable.</div>
+            <div class="hint" id="org-hint">The practice, hospital, or program this is for.</div>
           </div>
           <div class="field">
             <label for="role">Your role</label>
@@ -84,7 +84,7 @@
           </div>
 
           <fieldset>
-            <legend>Is a budget in the relevant range already approved? *</legend>
+            <legend id="budget-legend">Is a budget in the relevant range already approved? *</legend>
             <div class="radio-row">
               <label><input type="radio" name="budget_ok" value="yes" required /> Yes</label>
               <label><input type="radio" name="budget_ok" value="no" /> Not yet</label>

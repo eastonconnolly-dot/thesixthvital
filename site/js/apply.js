@@ -4,6 +4,56 @@
   var msg = document.querySelector(".form-msg");
   var submitBtn = form.querySelector('button[type="submit"]');
 
+  // Same fields serve all three tracks, but the copy that fits a hospital's
+  // procurement process reads oddly for an individual applicant — swap it
+  // per track instead of hiding fields the scoring in services/qualify.py
+  // still expects (org, in particular, is required there for every track).
+  var TRACK_COPY = {
+    applicant: {
+      orgLabel: "School",
+      orgPlaceholder: "e.g. University of Washington School of Medicine",
+      orgHint: "The school or program you're applying through.",
+      rolePlaceholder: "e.g. MS4, post-bacc, gap-year applicant",
+      budgetLegend: "Do you already have funds set aside for this? *",
+    },
+    physician: {
+      orgLabel: "Organization",
+      orgPlaceholder: "Practice or hospital name, if any",
+      orgHint: "Leave blank if you're independent or between practices.",
+      rolePlaceholder: "e.g. Orthopedic Surgeon, Hospitalist",
+      budgetLegend: "Is a budget in the relevant range already approved? *",
+    },
+    program: {
+      orgLabel: "Organization",
+      orgPlaceholder: "Hospital, practice, or program name",
+      orgHint: "The hospital, practice, or program this is for.",
+      rolePlaceholder: "e.g. Program Director, Chief Residency Officer",
+      budgetLegend: "Is a budget in the relevant range already approved? *",
+    },
+  };
+
+  var orgLabel = document.getElementById("org-label");
+  var orgInput = document.getElementById("org");
+  var orgHint = document.getElementById("org-hint");
+  var roleInput = document.getElementById("role");
+  var budgetLegend = document.getElementById("budget-legend");
+
+  function applyTrackCopy(track) {
+    var copy = TRACK_COPY[track];
+    if (!copy) return;
+    orgLabel.textContent = copy.orgLabel;
+    orgInput.placeholder = copy.orgPlaceholder;
+    orgHint.textContent = copy.orgHint;
+    roleInput.placeholder = copy.rolePlaceholder;
+    budgetLegend.textContent = copy.budgetLegend;
+  }
+
+  form.querySelectorAll('input[name="track"]').forEach(function (radio) {
+    radio.addEventListener("change", function () {
+      applyTrackCopy(radio.value);
+    });
+  });
+
   function showMsg(text, kind) {
     msg.textContent = text;
     msg.className = "form-msg show " + kind;
