@@ -82,9 +82,19 @@ p { margin: 0 0 1em; }
   position: sticky;
   top: 0;
   z-index: 20;
+  border-bottom: 1px solid var(--border);
+}
+/* backdrop-filter lives on ::before, not .site-header itself, because a
+   filter/backdrop-filter on an ancestor makes it the containing block for
+   position:fixed descendants — which would trap the mobile nav overlay
+   inside the header's own box instead of letting it fill the viewport. */
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: saturate(140%) blur(10px);
-  border-bottom: 1px solid var(--border);
 }
 .site-header .wrap {
   display: flex;
