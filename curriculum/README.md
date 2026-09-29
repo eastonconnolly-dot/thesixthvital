@@ -20,7 +20,7 @@ it each time.
 - **Minute-by-minute run-of-show** — timed blocks for the actual session(s).
 - **Exact exercises** — the specific drills, prompts, and simulated
   scenarios to run, not just "do a roleplay."
-- **Debrief scripts** — the actual questions to ask after each rep, so
+- **Debrief scripts** — the actual questions to ask after each encounter, so
   scoring the rubric happens in the room, not from memory afterward.
 - **Close** — what happens in the last 15 minutes, every time: the final
   encounter is filmed, scored, and the client leaves knowing their number.
@@ -43,7 +43,7 @@ it each time.
 - Filming setup (phone on a tripod is enough — framing matters more than
   camera quality): wide enough to catch both people, audio clear enough to
   re-watch for filler-word counting.
-- Printed rubric card (one per rep) — see `shared/rubric.py` for the exact
+- Printed rubric card (one per encounter) — see `shared/rubric.py` for the exact
   five dimensions and the 1–5 anchors per point, so scoring is consistent
   session to session instead of a felt sense each time.
 - A visible timer for pacing drills — not on your phone (that's also the

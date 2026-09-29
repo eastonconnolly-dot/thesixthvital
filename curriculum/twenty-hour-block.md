@@ -29,20 +29,20 @@ no continuous-day memory to lean on here.
 
 Filmed baseline encounter first (cold, any scenario matching their stated
 need), scored and shown but not unpacked. Then Read (Room, Emotion, Angle,
-Desire) taught against their own tape, followed by 3–4 drill reps. Close
-the block by teaching Pick the P and running 2–3 reps against it. Same
+Desire) taught against their own tape, followed by 3–4 drill encounters. Close
+the block by teaching Pick the P and running 2–3 encounters against it. Same
 content as Physician Private's Day 1 morning-through-midafternoon, just
 without Speak yet.
 
 ## Block B — Speak mechanics (3h)
 
 Sit, Pace, Eyes, Air, Kill the fillers — full isolation-drill sequence, one
-dial per rep, same as the other scripts. Close with 2 integrated reps
+dial per encounter, same as the other scripts. Close with 2 integrated encounters
 (Read + Pick + Speak).
 
 ## Block C — Ask (2h)
 
-Acknowledge, Stop, Know what they want. Teach, then 3–4 integrated reps
+Acknowledge, Stop, Know what they want. Teach, then 3–4 integrated encounters
 (Read + Pick + Speak + Ask). Shortest block on purpose — Ask is three small
 moves, not five dials or four modes; it doesn't need more room than this.
 
@@ -50,21 +50,21 @@ moves, not five dials or four modes; it doesn't need more room than this.
 
 The differentiator, and the only block as long as a full intensive's Shift
 module. Teach See/Hold/Identify/Flip/Test, then run 5–6
-`shift_to_mode` reps across scenarios. This block is where the real
+`shift_to_mode` encounters across scenarios. This block is where the real
 progress shows up — budget the time and don't compress it if a prior block
 ran long.
 
 ## Block E — Scenario-specific deep dive (3h)
 
 Whichever of `diagnosis_delivery` / `bad_news` / `refusal` / `angry_family`
-matches what actually brought this client in. Run 5–6 reps in that single
+matches what actually brought this client in. Run 5–6 encounters in that single
 scenario only, cycling P-modes and shifts within it, so they leave with
 real depth on their specific recurring conversation rather than breadth
 across all four.
 
 ## Block F — Integration, final encounter, close (4h)
 
-Two or three full integrated reps first (everything together, mixed
+Two or three full integrated encounters first (everything together, mixed
 scenarios), then the filmed final encounter, then score and compare live
 — same guarantee checkpoint as every other script (6-point lift or
 continue at no charge). Close with the one-page personal playbook, badge,

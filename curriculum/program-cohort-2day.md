@@ -4,7 +4,7 @@
 
 Day 1 runs identically to `program-cohort-1day.md` through the paired
 Speak drilling block — don't rewrite it, just follow that script through
-2:15pm on Day 1. What's different is everything after that: more rep
+2:15pm on Day 1. What's different is everything after that: more encounter
 volume, a proper Shift block instead of a compressed one, and a leadership
 debrief closing out Day 2. Same scaling notes apply for larger groups.
 
@@ -25,7 +25,7 @@ freed up by not compressing Ask/Shift into Day 1 goes into a second, deeper
 paired-drilling round on Read + Pick + Speak before the day closes.
 
 **2:30–3:15 — Extended paired drilling: Read + Pick + Speak**
-A second full round, new cards, more reps per person than the 1-Day
+A second full round, new cards, more encounters per person than the 1-Day
 version allows.
 
 **3:15–3:30 — Break**
@@ -36,7 +36,7 @@ what they want.
 
 **4:00–4:30 — Day 1 close**
 Preview Day 2: full Shift module, a group high-stakes-room exercise, more
-filmed reps, and the leadership debrief at the end.
+filmed encounters, and the leadership debrief at the end.
 
 ---
 
@@ -49,7 +49,7 @@ Quick group warm-up, no scoring.
 Full module — See, Hold, Identify, Flip, Test.
 
 **10:00–11:00 — Paired drilling: Shift-integrated**
-Full reps with unannounced mid-rep P-mode switches.
+Full encounters with unannounced P-mode switches partway through.
 
 **11:00–11:15 — Break**
 
@@ -62,8 +62,8 @@ family-conference exercise.
 
 **12:15–1:15 — Lunch**
 
-**1:15–2:15 — Filmed final reps**
-Higher rep volume than the 1-Day version — this is what the extra day
+**1:15–2:15 — Filmed final encounters**
+Higher encounter volume than the 1-Day version — this is what the extra day
 buys. One at a time for small groups, parallel clusters for larger ones.
 
 **2:15–2:30 — Break**

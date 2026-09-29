@@ -27,7 +27,7 @@ physicians book this because of one recurring type of conversation
 they know you actually read the brief.
 
 **9:20–9:45 — Filmed baseline encounter**
-One rep, cold. Pick whichever of the four scenarios most closely matches
+One encounter, cold. Pick whichever of the four scenarios most closely matches
 what brought them here. Any P-mode; default to Proof if unsure.
 
 **9:45–10:15 — Score, reveal, don't unpack yet**
@@ -42,7 +42,7 @@ often misread under time pressure: flat affect after a diagnosis usually
 reads as calm and is usually shock.
 
 **11:15–12:00 — Drill: Read only**
-3–4 reps across the four scenarios (rotate through diagnosis_delivery,
+3–4 encounters across the four scenarios (rotate through diagnosis_delivery,
 bad_news, refusal). Stop before they respond in-scene each time and make
 them name all four reads first.
 
@@ -57,19 +57,19 @@ needs some form of control over what happens to them or their family
 member, even a small one.
 
 **1:45–2:45 — Drill: Pick the P + respond**
-4 reps, one per P-mode, mixing scenarios. Debrief each: which P did they
+4 encounters, one per P-mode, mixing scenarios. Debrief each: which P did they
 read, did the response actually match it.
 
 **2:45–3:00 — Break**
 
 **3:00–3:45 — Teach: Speak**
-Sit, Pace, Eyes, Air, Kill the fillers. Isolation drill, one dial per rep.
+Sit, Pace, Eyes, Air, Kill the fillers. Isolation drill, one dial per encounter.
 For physicians, Sit and Air are usually the two worth the most time —
 standing over a seated patient and rushing to fill silence after bad news
 are the two most common unforced errors this track shows up with.
 
-**3:45–4:30 — Drill: integrated reps**
-3–4 full reps, Read + Pick + Speak, across all four scenarios.
+**3:45–4:30 — Drill: integrated encounters**
+3–4 full encounters, Read + Pick + Speak, across all four scenarios.
 
 **4:30–4:50 — Day 1 debrief**
 Name their specific weakest dial. Preview Day 2: "tomorrow the family in
@@ -83,8 +83,8 @@ Log the baseline Scorecard fields now.
 
 ## Day 2 — Ask, Shift, the high-stakes room, final encounter
 
-**9:00–9:15 — Recap + warm-up rep**
-One quick rep, no scoring.
+**9:00–9:15 — Recap + warm-up encounter**
+One quick encounter, no scoring.
 
 **9:15–10:00 — Teach: Ask**
 Acknowledge, Stop, Know what they want. For this track: acknowledge the
@@ -94,7 +94,7 @@ fully instead of rushing to the plan, then close with a real question —
 sense," which everyone answers yes to regardless.
 
 **10:00–11:00 — Drill: Ask integrated**
-3–4 full reps, Read + Pick + Speak + Ask, across scenarios.
+3–4 full encounters, Read + Pick + Speak + Ask, across scenarios.
 
 **11:00–11:15 — Break**
 
@@ -106,8 +106,8 @@ Power family member, handed a real choice, can soften into Permission.
 
 **12:00–1:00 — Lunch**
 
-**1:00–2:30 — Drill: Shift-integrated reps**
-4–5 reps using the `shift_to_mode` mechanic, mixed scenarios. Debrief:
+**1:00–2:30 — Drill: Shift-integrated encounters**
+4–5 encounters using the `shift_to_mode` mechanic, mixed scenarios. Debrief:
 where did it shift, how fast did they catch it — score recovery speed.
 
 **2:30–2:45 — Break**
@@ -121,7 +121,7 @@ actually breaks a physician in a real family conference — more than one
 person, more than one P-mode, simultaneously.
 
 **3:15–3:45 — Filmed final encounter**
-One rep, same difficulty as the baseline, unprompted.
+One encounter, same difficulty as the baseline, unprompted.
 
 **3:45–4:15 — Score final, compare live**
 Fill in the final Scorecard with them watching. Reveal the lift together —

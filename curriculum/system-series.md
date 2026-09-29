@@ -14,7 +14,7 @@ matters more than the exact dates.
 |---|---|---|
 | Month 1 | Kickoff — full 2-day cohort intensive | `program-cohort-2day.md`, run in full |
 | Month 3 | Half-day booster — Shift refresher | New scenario variety, no re-teaching basics |
-| Month 5 | Half-day booster — compound high-stakes room | Multiple family members + mid-rep shifts together |
+| Month 5 | Half-day booster — compound high-stakes room | Multiple family members + mid-encounter shifts together |
 | Month 7 | Mid-year check-in — re-score + leadership debrief | Filmed re-encounter vs. original baseline |
 | Month 9 | Closing intensive — final filmed encounters | Full cohort re-score |
 | Month 9–10 | Year-end leadership debrief | Year-over-year outcomes report |
@@ -29,7 +29,7 @@ method needs to land completely here.
 ## Month 3 — Half-day booster: Shift refresher
 
 3.5–4 hours. No re-teaching Read/Pick/Speak/Ask — assume retention from
-the kickoff and confirm it with one quick integrated rep per person instead
+the kickoff and confirm it with one quick integrated encounter per person instead
 of a full teaching block. Spend the bulk of the time on fresh
 `shift_to_mode` scenarios the cohort hasn't seen yet, mixing all four
 physician scenarios. Close with a short group discussion: where has the
@@ -42,7 +42,7 @@ it stuck yet.
 kickoff: small groups of 3–4, multiple family members with different
 P-modes *and* a mid-scenario shift, run together rather than as separate
 skills. This is the module that actually separates a one-time intensive
-from a real year-long program — nobody gets this rep volume from a single
+from a real year-long program — nobody gets this encounter volume from a single
 event.
 
 ## Month 7 — Mid-year check-in
@@ -59,7 +59,7 @@ cohort is still clustering low.
 
 Full day. Final filmed encounters for the full cohort, same peer-drilling
 structure as `program-cohort-1day.md`'s afternoon block for a last round of
-reps beforehand if the group wants the warm-up, then straight to filming
+encounters beforehand if the group wants the warm-up, then straight to filming
 and scoring.
 
 ## Month 9–10 — Year-end leadership debrief

@@ -26,7 +26,7 @@ Introduce the day, the method, and the format: everyone gets filmed twice
 (a short baseline and a short final), and spends the rest of the day
 drilling on each other while you circulate.
 
-**9:20–10:15 — Individual filmed baseline reps**
+**9:20–10:15 — Individual filmed baseline encounters**
 One at a time, in front of the group, ~5 minutes each including the
 scenario: applicant plays themselves, you play the interviewer. Everyone
 else watches and takes one note — what did this person miss that they'd
@@ -39,9 +39,9 @@ To the whole group at once, same content as Match Ready's Day 1 modules,
 compressed into one block.
 
 **11:15–12:00 — Paired drilling: Read + Pick the P**
-Split into pairs. Hand out scenario cards. Each person runs 2 reps as the
+Split into pairs. Hand out scenario cards. Each person runs 2 encounters as the
 applicant, 2 as the interviewer (playing the card's P-mode). Circulate —
-you're not running every rep, you're spot-coaching across the room.
+you're not running every encounter, you're spot-coaching across the room.
 
 **12:00–1:00 — Lunch**
 
@@ -52,7 +52,7 @@ group demonstration per dial rather than individual isolation drills.
 **1:30–2:15 — Paired drilling: Speak focus**
 Same pairs, new cards. This round, the observing partner's job is
 specifically to call out filler words and broken eye contact after each
-rep — peer feedback on the mechanical dials, since that's the easiest
+encounter — peer feedback on the mechanical dials, since that's the easiest
 thing for a non-expert partner to catch accurately.
 
 **2:15–2:30 — Break**
@@ -63,10 +63,10 @@ here. Explain both, then explain that the next drilling round includes
 unannounced shifts.
 
 **3:00–3:30 — Paired drilling: full integration with shifts**
-New cards, some marked to shift mid-rep (partner switches P-mode partway
+New cards, some marked to shift mid-encounter (partner switches P-mode partway
 through without announcing it, per the card).
 
-**3:30–4:15 — Individual filmed final reps**
+**3:30–4:15 — Individual filmed final encounters**
 Same format as the morning baseline, one at a time in front of the group.
 
 **4:15–4:30 — Close**

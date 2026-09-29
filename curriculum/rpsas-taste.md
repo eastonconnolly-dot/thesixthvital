@@ -23,11 +23,11 @@ rubric card printed. One copy is enough; there's no Day 2 recap to fold in.
 
 **0:00–0:10 — Welcome**
 Fast rapport, confirm their situation from the brief in one sentence,
-explain the format: "one rep now, we teach the method, one rep at the end
+explain the format: "one encounter now, we teach the method, one encounter at the end
 so you can see exactly what moved."
 
 **0:10–0:25 — Filmed baseline encounter**
-One rep, cold, no coaching. Applicant: `mmi_station`, any P-mode. Physician:
+One encounter, cold, no coaching. Applicant: `mmi_station`, any P-mode. Physician:
 `diagnosis_delivery` or `bad_news`, any P-mode.
 
 **0:25–0:35 — Score and reveal**
@@ -41,7 +41,7 @@ decision you make from them. Use their baseline tape as the live example
 for both in the same pass.
 
 **1:05–1:35 — Drill: Read + Pick the P**
-3 reps. Debrief each in one line: what they read, which P they picked, did
+3 encounters. Debrief each in one line: what they read, which P they picked, did
 the response match it.
 
 **1:35–1:50 — Break**
@@ -52,8 +52,8 @@ visible issue from the baseline tape and teach that dial in depth; name the
 other four in one sentence each rather than drilling all five in isolation.
 There isn't time for the full isolation-drill sequence Match Ready uses.
 
-**2:10–2:30 — Drill: full rep + a Shift preview**
-2 reps, Read + Pick + Speak integrated. On the second rep, throw in one
+**2:10–2:30 — Drill: full encounter + a Shift preview**
+2 encounters, Read + Pick + Speak integrated. On the second encounter, throw in one
 unannounced `shift_to_mode` — don't pre-teach Shift, just let it happen and
 see what they do with it. Debrief: "the panel/patient changed what they
 wanted partway through — did you catch it?" This is a deliberate preview,
@@ -61,7 +61,7 @@ not full instruction; it's the module they don't get in this session, and
 that's the honest, natural bridge to the next question.
 
 **2:30–2:45 — Filmed final encounter**
-One rep, same difficulty as baseline, unprompted.
+One encounter, same difficulty as baseline, unprompted.
 
 **2:45–3:00 — Score, compare, close**
 Reveal the lift live. Whatever it is, name it plainly. Then the actual

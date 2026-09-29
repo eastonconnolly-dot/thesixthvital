@@ -32,7 +32,7 @@ where you land." Show them the badge and explain the scorecard now, so they
 know what they're working toward.
 
 **9:20–9:45 — Filmed baseline encounter**
-One `mmi_station` rep, cold. No coaching, no warmup beyond the welcome. Pick
+One `mmi_station` encounter, cold. No coaching, no warmup beyond the welcome. Pick
 whichever P-mode the brief suggests will be hardest for them; default to
 Proof if you're not sure. This is the "before" tape — let it run its
 natural length, don't rescue them if it goes sideways.
@@ -51,7 +51,7 @@ pause it at the moment they missed something and ask "what was actually in
 the room right there?" before you tell them.
 
 **11:15–12:00 — Drill: Read only**
-3–4 rapid `mmi_station` reps. After each: stop before they respond in-scene
+3–4 rapid `mmi_station` encounters. After each: stop before they respond in-scene
 and ask "what did you just read — Room, Emotion, Angle, Desire?" Don't let
 them proceed until they've named all four, even as a guess. No scoring yet.
 
@@ -66,19 +66,19 @@ challenged. Use the P-mode descriptions in `scenarios.py` verbatim where
 useful — they're written to be said out loud.
 
 **1:45–2:45 — Drill: Pick the P + respond**
-4 reps, one per P-mode, `panel_question` scenario. Debrief after each in one
+4 encounters, one per P-mode, `panel_question` scenario. Debrief after each in one
 line: "which P did you read, and did your answer actually match it?"
 
 **2:45–3:00 — Break**
 
 **3:00–3:45 — Teach: Speak**
 Sit, Pace, Eyes, Air, Kill the fillers. Run an isolation drill: same simple
-question, four reps, one dial per rep — this one is Pace only, next is Eyes
+question, four encounters, one dial per encounter — this one is Pace only, next is Eyes
 only. Isolating the dial is what makes it correctable; bundled together
 it's just "be more confident," which isn't a real instruction.
 
 **3:45–4:30 — Drill: Read + Pick + Speak, integrated**
-3–4 full reps, no Ask or Shift yet. This is the first time everything so
+3–4 full encounters, no Ask or Shift yet. This is the first time everything so
 far runs together.
 
 **4:30–4:50 — Day 1 debrief**
@@ -94,8 +94,8 @@ Log the baseline half of the Scorecard in the system now, while it's fresh.
 
 ## Day 2 — Ask, Shift, mock panel, final encounter
 
-**9:00–9:15 — Recap + warm-up rep**
-One quick `mmi_station` rep, no scoring, just to reset the muscle from
+**9:00–9:15 — Recap + warm-up encounter**
+One quick `mmi_station` encounter, no scoring, just to reset the muscle from
 yesterday.
 
 **9:15–10:00 — Teach: Ask**
@@ -107,7 +107,7 @@ something that confirms you actually addressed what they were probing for
 allows it.
 
 **10:00–11:00 — Drill: Ask integrated**
-3–4 full reps, Read + Pick + Speak + Ask, `mmi_station`.
+3–4 full encounters, Read + Pick + Speak + Ask, `mmi_station`.
 
 **11:00–11:15 — Break**
 
@@ -119,8 +119,8 @@ adversarial. This is the module every other interview-prep service skips.
 
 **12:00–1:00 — Lunch**
 
-**1:00–2:30 — Drill: Shift-integrated reps**
-4–5 reps using the `shift_to_mode` mechanic — pick a starting P-mode, let
+**1:00–2:30 — Drill: Shift-integrated encounters**
+4–5 encounters using the `shift_to_mode` mechanic — pick a starting P-mode, let
 it flip partway through, don't announce it. Mix `mmi_station` and
 `panel_question`. Debrief each: "where did it shift, and how fast did you
 catch it?" — score recovery speed, not whether they caught it instantly.
@@ -135,7 +135,7 @@ have a colleague available to guest as a second interviewer for this block,
 it scales up naturally; solo works fine too.
 
 **3:15–3:45 — Filmed final encounter**
-One `mmi_station` or `panel_question` rep, same difficulty as the baseline,
+One `mmi_station` or `panel_question` encounter, same difficulty as the baseline,
 unprompted. This is the "after" tape.
 
 **3:45–4:15 — Score final, compare live**

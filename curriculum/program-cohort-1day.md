@@ -22,7 +22,7 @@ groups are often bigger than one facilitator can individually film.
 
 **Scaling above ~12 people:** split into clusters of 4–6 for the baseline
 and final filming blocks, each cluster filming each other on a phone while
-you circulate and spot-check rather than watching every single rep
+you circulate and spot-check rather than watching every single encounter
 yourself. The teaching blocks stay whole-group regardless of size.
 
 ---
@@ -34,7 +34,7 @@ Introduce the day and the method to the full cohort. Explain the format:
 everyone gets filmed twice, the rest of the day is peer drilling with you
 circulating.
 
-**9:20–10:15 — Filmed baseline reps**
+**9:20–10:15 — Filmed baseline encounters**
 One at a time for small groups; parallel clusters for larger ones (see
 Scaling above).
 
@@ -45,7 +45,7 @@ Whole group, same content as Physician Private's Day 1 modules, compressed
 into one block — same as the applicant cohort's approach.
 
 **11:15–12:00 — Paired drilling: Read + Pick the P**
-Scenario cards, pairs rotate through 2 reps each side.
+Scenario cards, pairs rotate through 2 encounters each side.
 
 **12:00–1:00 — Lunch**
 
@@ -53,7 +53,7 @@ Scenario cards, pairs rotate through 2 reps each side.
 Five dials, group demonstration format rather than individual isolation.
 
 **1:30–2:15 — Paired drilling: Speak focus**
-Partner's job: call out fillers and broken eye contact after each rep.
+Partner's job: call out fillers and broken eye contact after each encounter.
 
 **2:15–2:30 — Break**
 
@@ -62,9 +62,9 @@ Compressed, same as the applicant cohort — explain both, flag that the
 next round includes unannounced shifts.
 
 **3:00–3:30 — Paired drilling: full integration with shifts**
-Cards marked for a mid-rep P-mode switch.
+Cards marked for a mid-encounter P-mode switch.
 
-**3:30–4:15 — Filmed final reps**
+**3:30–4:15 — Filmed final encounters**
 Same format as the morning baseline block.
 
 **4:15–4:30 — Close**
