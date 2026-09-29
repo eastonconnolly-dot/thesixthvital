@@ -336,3 +336,32 @@ footer.site-footer a:hover { color: var(--fg); }
 
 .legal h2 { margin-top: 1.6em; }
 .legal { max-width: 760px; }
+
+/* FAQ */
+.faq { max-width: 760px; }
+.faq details {
+  border-bottom: 1px solid var(--border);
+  padding: 20px 0;
+}
+.faq details:first-child { padding-top: 0; }
+.faq summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.05rem;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: "+";
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--accent);
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq details p { color: var(--fg-muted); margin: 0.9em 0 0; }
