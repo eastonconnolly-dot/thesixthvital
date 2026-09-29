@@ -45,7 +45,7 @@ SEQUENCE_DEFINITIONS = {
                 "<p>Most applicants prep answers. Almost none prep the first four seconds of "
                 "delivering them — and that's what a panel actually remembers.</p>"
                 "<p>Here's a 90-second clip of a real applicant's MMI answer, before and after "
-                "one Sixth Vital session: <a href=\"https://sixthvital.example.com/proof#mmi-clip\">watch it</a>.</p>"
+                "one Sixth Vital session: <a href=\"https://thesixthvital.com/proof#mmi-clip\">watch it</a>.</p>"
                 "<p>Same content. Completely different read from the panel.</p>"
                 "<p>— Sixth Vital</p>"),
             _step(4,
@@ -55,7 +55,7 @@ SEQUENCE_DEFINITIONS = {
                 "rubric we score against, why \"P-mode\" reading (what an interviewer actually "
                 "wants from you in the moment) moves scores more than rehearsed content, and "
                 "before/after numbers from the last applicant cohort.</p>"
-                "<p><a href=\"https://sixthvital.example.com/proof\">One-page proof →</a></p>"
+                "<p><a href=\"https://thesixthvital.com/proof\">One-page proof →</a></p>"
                 "<p>— Sixth Vital</p>"),
             _step(4,
                 "free 45 minutes on MMI stations, no pitch",
@@ -63,7 +63,7 @@ SEQUENCE_DEFINITIONS = {
                 "<p>I'm running a free 45-minute session on how MMI stations actually get scored "
                 "and where most applicants lose points without noticing. Open to anyone prepping "
                 "for interviews this cycle, no obligation.</p>"
-                "<p><a href=\"https://sixthvital.example.com/apply.html#lunch-talk\">Grab a spot →</a></p>"
+                "<p><a href=\"https://thesixthvital.com/apply.html#lunch-talk\">Grab a spot →</a></p>"
                 "<p>— Sixth Vital</p>"),
             _step(4,
                 "closing your file",
@@ -85,7 +85,7 @@ SEQUENCE_DEFINITIONS = {
                 "proof, a plan, permission, or a sense of control — and to adjust mid-conversation "
                 "when it shifts, which it usually does.</p>"
                 "<p>Here's a short clip from one of our simulated encounters showing that shift "
-                "happening live: <a href=\"https://sixthvital.example.com/proof#physician-clip\">watch it</a>.</p>"
+                "happening live: <a href=\"https://thesixthvital.com/proof#physician-clip\">watch it</a>.</p>"
                 "<p>— Sixth Vital</p>"),
             _step(4,
                 "the one-pager physicians forward to their chief residents",
@@ -93,7 +93,7 @@ SEQUENCE_DEFINITIONS = {
                 "<p>Here's the one-page breakdown: the 5-dimension rubric (read accuracy, mode "
                 "match, delivery, adaptation, outcome), how the mid-encounter shift training "
                 "works, and measured score lift from physicians who've been through it.</p>"
-                "<p><a href=\"https://sixthvital.example.com/proof\">One-page proof →</a></p>"
+                "<p><a href=\"https://thesixthvital.com/proof\">One-page proof →</a></p>"
                 "<p>— Sixth Vital</p>"),
             _step(4,
                 "free 45-minute session: the mid-conversation shift",
@@ -102,7 +102,7 @@ SEQUENCE_DEFINITIONS = {
                 "mistake in delivering bad news: missing the moment a patient's family shifts "
                 "from wanting proof to wanting control (or vice versa). Open seat if you want it, "
                 "no strings attached.</p>"
-                "<p><a href=\"https://sixthvital.example.com/method.html#lunch-talk\">Reserve a spot →</a></p>"
+                "<p><a href=\"https://thesixthvital.com/method.html#lunch-talk\">Reserve a spot →</a></p>"
                 "<p>— Sixth Vital</p>"),
             _step(4,
                 "last one from me",
@@ -124,7 +124,7 @@ SEQUENCE_DEFINITIONS = {
                 "patient in front of them actually needs in that moment, or to adjust when it "
                 "changes mid-conversation.</p>"
                 "<p>Here's a 90-second clip showing that gap closing across one cohort: "
-                "<a href=\"https://sixthvital.example.com/proof#program-clip\">watch it</a>.</p>"
+                "<a href=\"https://thesixthvital.com/proof#program-clip\">watch it</a>.</p>"
                 "<p>— Sixth Vital</p>"),
             _step(4,
                 "the one-pager program directors send up the chain",
@@ -132,7 +132,7 @@ SEQUENCE_DEFINITIONS = {
                 "<p>Here's what a cohort intensive with {{org}} would look like on paper: the "
                 "5-dimension scoring rubric, baseline-to-final lift data from prior cohorts, and "
                 "the format (half-day or full-day, on-site).</p>"
-                "<p><a href=\"https://sixthvital.example.com/programs.html\">One-page proof →</a></p>"
+                "<p><a href=\"https://thesixthvital.com/programs.html\">One-page proof →</a></p>"
                 "<p>— Sixth Vital</p>"),
             _step(4,
                 "free 45 minutes for your program leads",
@@ -140,7 +140,7 @@ SEQUENCE_DEFINITIONS = {
                 "<p>I'm offering a free 45-minute session for {{org}}'s program leadership — "
                 "walking through how the rubric scores real encounters and what a cohort's lift "
                 "data actually looks like, no sales pitch attached.</p>"
-                "<p><a href=\"https://sixthvital.example.com/programs.html#lunch-talk\">Reserve a spot →</a></p>"
+                "<p><a href=\"https://thesixthvital.com/programs.html#lunch-talk\">Reserve a spot →</a></p>"
                 "<p>— Sixth Vital</p>"),
             _step(4,
                 "closing the loop with {{org}}",
@@ -160,20 +160,20 @@ SEQUENCE_DEFINITIONS = {
                 "<p>Sixth Vital trains physicians and physician-track trainees to read what the person "
                 "in front of them actually needs — proof, a plan, permission, or control — and "
                 "adjust when it shifts mid-conversation.</p>"
-                "<p>Here's a short clip: <a href=\"https://sixthvital.example.com/proof\">watch it</a>.</p>"
+                "<p>Here's a short clip: <a href=\"https://thesixthvital.com/proof\">watch it</a>.</p>"
                 "<p>— Sixth Vital</p>"),
             _step(4,
                 "the one-page version",
                 "<p>Hi {{first_name}},</p>"
                 "<p>Here's a one-pager on the method and the numbers behind it: "
-                "<a href=\"https://sixthvital.example.com/proof\">sixthvital.example.com/proof</a>.</p>"
+                "<a href=\"https://thesixthvital.com/proof\">thesixthvital.com/proof</a>.</p>"
                 "<p>— Sixth Vital</p>"),
             _step(4,
                 "free 45-minute session, open invite",
                 "<p>Hi {{first_name}},</p>"
                 "<p>I'm running a free 45-minute session on the framework behind this — open to "
                 "anyone, no obligation: "
-                "<a href=\"https://sixthvital.example.com/method.html#lunch-talk\">grab a spot</a>.</p>"
+                "<a href=\"https://thesixthvital.com/method.html#lunch-talk\">grab a spot</a>.</p>"
                 "<p>— Sixth Vital</p>"),
             _step(4,
                 "one last note",

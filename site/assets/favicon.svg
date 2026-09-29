@@ -1,0 +1,9 @@
+<svg viewBox="0 0 76 76" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="faviconTitle">
+  <title id="faviconTitle">Sixth Vital</title>
+  <circle cx="38" cy="38" r="38" fill="#0B0B0B"/>
+  <circle cx="38" cy="38" r="29" fill="none" stroke="#F4EFE6" stroke-width="2.5"/>
+  <path d="M 16 40 L 24 40 L 27 34 L 30 46 L 33 40 L 40 40 L 44 22 L 48 56 L 52 40 L 60 40"
+        fill="none" stroke="#F4EFE6" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M 40 40 L 44 22 L 48 56 L 52 40"
+        fill="none" stroke="#E4573D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>
