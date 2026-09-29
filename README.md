@@ -6,10 +6,15 @@ built around the RPSAS Method (Read, Pick, Speak, Ask, Shift). See
 platform ("the Hub") — short version: the Hub is the CRM/business-ops layer
 (leads, deals, pipeline), and Sixth Vital is provisioned there as a real tenant
 (three pipelines, one per track — see [HUB_INTEGRATION.md](HUB_INTEGRATION.md),
-not yet applied) via [`api/services/hub_sync.py`](api/services/hub_sync.py).
+applied and live on tenant 13) via [`api/services/hub_sync.py`](api/services/hub_sync.py).
 This repo stays the system of record for everything the Hub has no concept
 of — proposals, e-signatures, scorecards, and above all the AI training
 platform (RPSAS Practice), Sixth Vital's actual product differentiator.
+
+[`curriculum/`](curriculum/) is the other half of "system of record" — the
+actual facilitator scripts for every paid package (minute-by-minute
+run-of-show, not just the marketing framework on the site). Internal only,
+not published anywhere.
 
 ## Status
 
