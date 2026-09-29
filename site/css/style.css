@@ -296,7 +296,7 @@ section.tight { padding: 56px 0; }
   font-family: var(--font-display);
   font-size: 1.6rem;
 }
-.pkg-card .track-tag {
+.track-tag {
   align-self: flex-start;
   font-size: 0.72rem;
   letter-spacing: 0.08em;
