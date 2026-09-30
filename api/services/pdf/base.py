@@ -5,10 +5,10 @@ xhtml2pdf-based HTML templates); this is built fresh, following its
 HTML-template spirit loosely but using reportlab.platypus directly since
 that's what this project's stack calls for.
 
-Real Playfair Display / Source Sans 3 TTFs aren't vendored here (that would
-mean downloading font files without asking first). Drop .ttf files into
-shared/brand/fonts/ (see the names below) to upgrade from the built-in
-Times-Roman/Helvetica substitutes with no code changes.
+Real Playfair Display / Source Sans 3 TTFs are vendored in
+shared/brand/fonts/ — see shared/brand/fonts/README.md for their source
+and license (both SIL Open Font License). Falls back to the built-in
+Times-Roman/Helvetica substitutes if those files are ever missing.
 """
 
 import os

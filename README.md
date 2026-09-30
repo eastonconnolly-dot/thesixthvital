@@ -176,8 +176,8 @@ mode shift, rubric scoring, micro-lessons, and Stripe subscriptions with a
   scenario picker, a chat-style encounter page (optional mic input / spoken
   replies via the browser's Web Speech API, no server dependency), and the
   five-lesson unlock progression (`shared/models.py`'s `MICRO_LESSONS` order:
-  read → pick → speak → ask → shift — lesson **content** is a placeholder,
-  same as the privacy/terms pages, flagged for the founder to fill in).
+  read → pick → speak → ask → shift — real teaching content for all five,
+  not a placeholder; see `shared/prompts/lessons.py`).
 - Subscriptions: `$49`/`$149`/`$199` (applicant/physician/program-seat),
   7-day trial, via `stripe_client.create_subscription_checkout_session` — set
   `STRIPE_PRICE_*` once those prices exist in the Stripe dashboard.

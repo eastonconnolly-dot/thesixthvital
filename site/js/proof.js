@@ -10,20 +10,27 @@
     return node;
   }
 
+  function reveal(id) {
+    var node = document.getElementById(id);
+    if (node) node.hidden = false;
+  }
+
   fetch(window.RPSAS_CONFIG.apiBase + "/public/proof")
     .then(function (res) { if (!res.ok) throw new Error("no data"); return res.json(); })
     .then(function (data) {
-      if (statRow && data.stats && data.stats.length) {
-        statRow.textContent = "";
+      var hasStats = statRow && data.stats && data.stats.length;
+      var hasTestimonials = testimonialWrap && data.testimonials && data.testimonials.length;
+
+      if (hasStats) {
         data.stats.forEach(function (s) {
           var stat = el("div", "stat");
           stat.appendChild(el("div", "value", s.value));
           stat.appendChild(el("div", "label", s.label));
           statRow.appendChild(stat);
         });
+        reveal("proof-stats-section");
       }
-      if (testimonialWrap && data.testimonials && data.testimonials.length) {
-        testimonialWrap.textContent = "";
+      if (hasTestimonials) {
         data.testimonials.forEach(function (t) {
           var quote = el("blockquote", "testimonial");
           quote.appendChild(document.createTextNode("“" + t.quote + "”"));
@@ -31,9 +38,14 @@
           quote.appendChild(footer);
           testimonialWrap.appendChild(quote);
         });
+        reveal("proof-testimonials-section");
+      }
+      if (hasStats || hasTestimonials) {
+        var pending = document.getElementById("proof-pending");
+        if (pending) pending.hidden = true;
       }
     })
     .catch(function () {
-      // Pre-launch or API unreachable: leave the static fallback content in the page as-is.
+      // Pre-launch or API unreachable: leave the "not yet" note showing.
     });
 })();
