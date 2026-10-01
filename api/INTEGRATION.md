@@ -609,34 +609,14 @@ backward-compatible — every existing call site (`outreach/engine/sequences.py`
 the message a plain `MIMEText`, switching to `MIMEMultipart` only when
 attachments are actually passed.
 
-**Wiring gap, out of scope to close here:** "Positive testimonials flow to
-the Proof page automatically after founder approval" needs
-`routes/public.py::public_proof()` (out of scope to edit — another engineer
-is actively working in that file) to actually query approved testimonials.
-Today it hardcodes `"testimonials": []`. A small addition closes the gap:
-
-```python
-from models import ConsentRequest  # <-- add to the existing models import
-
-@bp.get("/public/proof")
-def public_proof():
-    ...
-    approved = (
-        ConsentRequest.query
-        .filter_by(kind="testimonial", approved=True)
-        .filter(ConsentRequest.response_text.isnot(None))
-        .order_by(ConsentRequest.responded_at.desc())
-        .limit(20)
-        .all()
-    )
-    testimonials = [{"name": c.participant_name, "text": c.response_text} for c in approved]
-    return jsonify({"stats": stats, "testimonials": testimonials})  # <-- was testimonials: []
-```
-
-Until that lands, `POST /admin/delivery/testimonials/<id>/approve` still
-flips `ConsentRequest.approved` correctly (verified in
-`api/tests/test_delivery.py`) — the gap is purely that nothing reads it on
-the public side yet.
+**Wiring gap — closed.** "Positive testimonials flow to the Proof page
+automatically after founder approval" is fully wired end to end:
+`routes/public.py::public_proof()` queries
+`ConsentRequest.query.filter_by(kind="testimonial", granted=True, approved=True)`
+and the site's `js/proof.js` renders whatever that returns. The full loop
+— session complete → testimonial ask auto-emailed → participant responds
+with real text → founder approves on that deal's `/admin/delivery/<id>`
+page → live on the public Proof page — has no remaining gap.
 
 New config (`api/config.py` / `.env.example`): `UPLOAD_STORAGE_DIR`
 (default `api/uploads/`), `UPLOAD_MAX_BYTES` (default 500MB),

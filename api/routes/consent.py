@@ -2,11 +2,11 @@
   - GET/POST /consent/<token> -- testimonial / clip-consent response
   - GET /refer/<lead_id> -- the day-7 referral ask's shareable link
 
-Standalone blueprint, not yet registered in api/app.py -- see
-api/INTEGRATION.md. A positive, founder-approved testimonial is what's
-meant to flow to the public Proof page -- see api/INTEGRATION.md for the
-small routes/public.py addition needed to actually query these (out of
-scope to edit that file directly here)."""
+Registered in api/app.py. A positive response lands with approved=False;
+routes/delivery.py::approve_testimonial is the founder-approval gate
+(surfaced on that deal's /admin/delivery/<id> page), and
+routes/public.py::public_proof already queries approved=True rows for the
+public Proof page."""
 
 from flask import Blueprint, abort, render_template, request
 

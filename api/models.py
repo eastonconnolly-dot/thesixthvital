@@ -526,7 +526,9 @@ class ConsentRequest(db.Model):
     """A testimonial or clip-consent ask sent after a scorecard is delivered.
     Public respond form at GET/POST /consent/<token> (routes/consent.py).
     `approved` gates whether a granted testimonial shows on the public Proof
-    page -- see api/INTEGRATION.md for the routes/public.py query needed."""
+    page -- reviewed/approved on that deal's /admin/delivery/<id> page
+    (routes/delivery.py::approve_testimonial), queried by
+    routes/public.py::public_proof."""
     __tablename__ = "consent_requests"
 
     id = db.Column(db.Integer, primary_key=True)

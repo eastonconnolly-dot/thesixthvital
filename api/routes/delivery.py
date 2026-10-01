@@ -3,8 +3,7 @@ complete and uploads the reps." Business logic lives in
 services/delivery.py; this blueprint is just form-handling + the
 testimonial-approval action.
 
-Standalone blueprint, not yet registered in api/app.py -- see
-api/INTEGRATION.md."""
+Registered in api/app.py."""
 
 from datetime import datetime
 
