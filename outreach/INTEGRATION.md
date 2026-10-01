@@ -1,13 +1,13 @@
 # Integrating the outreach engine (Phase 2)
 
-`outreach/` (list builders + sequence engine) is standalone — nothing in
-`api/app.py` was touched (another engineer is actively working in/around
-it). Two small new Flask blueprints need registering, plus one CLI/cron
-entry point to wire up.
+`outreach/` (list builders + sequence engine). Both blueprints below are
+registered in `api/app.py` and the cron entry points are declared in the
+repo-root `render.yaml` (`rpsas-sequence-tick`, `rpsas-check-replies`) —
+nothing from this section is still open.
 
-## 1. Register the blueprints in `api/app.py`
+## 1. Blueprints in `api/app.py` (done)
 
-Add alongside the other blueprint imports/registrations:
+For reference, what's registered there:
 
 ```python
 from routes.inbox import bp as inbox_bp
@@ -44,18 +44,15 @@ SEQUENCE_RAMP_DAYS = int(os.environ.get("SEQUENCE_RAMP_DAYS", "14"))
 SEQUENCE_RAMP_START_CAP = int(os.environ.get("SEQUENCE_RAMP_START_CAP", "10"))
 ```
 
-## 4. Cron wiring (not built here — scheduler infra is out of scope)
+## 4. Cron wiring (done)
 
-Three functions need to run on a schedule (Render cron job / APScheduler /
-whatever Ops (Phase 5) sets up):
-
-```python
-from outreach.engine import sequences, reply_detection
-
-sequences.tick()                  # advance due sequence enrollments (sends)
-reply_detection.check_for_replies()  # poll Gmail threads for replies (also
-                                      # best-effort triggers the classifier)
-```
+`flask tick-sequences` and `flask check-replies` (both registered in
+`api/app.py`'s `register_cli()`) wrap `sequences.tick()` and
+`reply_detection.check_for_replies()` respectively, and both are
+scheduled in the repo-root `render.yaml` (`rpsas-sequence-tick`,
+`rpsas-check-replies`, both every 15 minutes) — nothing left to wire up,
+just needs the Render deploy itself to exist (see the top "needs you"
+card on the work tracker).
 
 `outreach/seed_templates.py` is a one-time (or re-run-when-copy-changes)
 step, not a cron job: `python outreach/seed_templates.py` from the repo
@@ -118,3 +115,48 @@ HTTP layer mocked):
   CSV-import fallback (`import_advisors_csv`) is the recommended primary
   path for any advisor list that needs to be trustworthy rather than
   best-effort.
+
+## Initial targeting criteria (decided 2026-10-01)
+
+First real list-builder batch, once the API is deployed:
+
+**Geography — all three tracks:** Washington, Idaho, Oregon (the founder's
+own region). `search_hospitals`/`search_physicians` take `state` as a
+single value — call once per state (WA, ID, OR), not a single combined
+call.
+
+**Physician track — specialty filter (`taxonomy_description` in
+`nppes.search_physicians`):** Oncology, Surgery (general and orthopedic),
+Emergency Medicine, Critical Care/ICU, Palliative Care, OB/GYN. Picked for
+fit with the business, not availability — these are the specialties where
+delivering hard news and holding a room under pressure are routine, daily
+pressure, the sharpest match for the pitch. Without a specialty filter,
+"all physicians in WA" returns an unfocused list of hundreds of thousands
+of providers.
+
+**Program track:** `search_hospitals` needs no further filter beyond state
+— ready to run the moment the API is deployed. Separately, ACGME's
+CSV-import fallback (`import_acgme_csv`) can source residency/fellowship
+*programs* specifically (as opposed to hospitals generally) once someone
+exports a CSV from ACGME ADS Public's Program Search for WA/ID/OR — not
+done yet, no blocker, just hasn't been run.
+
+**Applicant track — target schools (researched and verified live
+2026-10-01):** `advisors.py` has no geography filter; it scrapes specific
+pre-health advising office pages. Verified these 8 pages are real and
+currently live:
+
+| School | Pre-health advising page | Scrapable live? |
+|---|---|---|
+| University of Washington | https://prehealth.uw.edu/ | Yes |
+| Washington State University | https://healthprofessions.wsu.edu/ | Yes |
+| Gonzaga University | https://www.gonzaga.edu/student-life/career-services/students/professional-graduate-school-resources/health-professions-pathways-program/gonzaga-pre-health | **No — Cloudflare-protected, blocks automated requests entirely (confirmed via `robots.txt` returning a bot-challenge page). Use `import_advisors_csv` with hand-entered contacts instead.** |
+| Portland State University | https://www.pdx.edu/pre-health/contact-pre-health-advising | Yes |
+| University of Oregon | https://cas.uoregon.edu/advising/pre-health/connect-pre-health-advising | Yes — 3 named advisors with direct emails already on the page (Sonia Gordillo, Amanda Kong, Camille Hoover) |
+| Oregon State University | https://health.oregonstate.edu/academics/pre-health | Yes |
+| University of Idaho | https://www.uidaho.edu/current-students/academic-support/academic-advising/pre-health-advising | Yes — 2 named advisors with direct emails already on the page (Natalie Burden, Aubrey Shaw) |
+| Idaho State University | https://www.isu.edu/hpac/contact/ | Yes — a full advisor directory with direct emails already on the page |
+
+OHSU was the original idea for an 8th school but isn't a fit — it's a
+graduate medical school with no undergraduate pre-health advising office
+of its own; swapped for Portland State.
