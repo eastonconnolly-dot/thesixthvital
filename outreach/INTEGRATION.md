@@ -134,6 +134,30 @@ pressure, the sharpest match for the pitch. Without a specialty filter,
 "all physicians in WA" returns an unfocused list of hundreds of thousands
 of providers.
 
+**Exact `taxonomy_description` strings to use (verified live
+2026-10-01 — NPPES's matching is specific, generic category names like
+"Oncology" alone also return loosely-related non-physician results; see
+the credential-filtering fix in `outreach/builders/nppes.py`):**
+
+| Category | Exact string |
+|---|---|
+| Oncology | `Hematology & Oncology` |
+| Surgery (general) | `Surgery` |
+| Surgery (orthopedic) | `Orthopaedic Surgery` |
+| Emergency Medicine | `Emergency Medicine` |
+| Critical Care | `Critical Care Medicine` |
+| Palliative Care | `Hospice and Palliative Medicine` |
+| OB/GYN | `Obstetrics & Gynecology` |
+
+Live preview run against this exact matrix (WA × ID × OR, physician-only
+after the credential fix): ~3,500+ real, named MD/DO physicians, most
+state/specialty pairs hitting the 200-result preview cap (so the true
+pool is larger). `nppes.py`'s `_to_candidate` now filters to an actual
+MD/DO credential — `enumeration_type=NPI-1` covers every individually
+enumerated provider, not just physicians, and several of these taxonomy
+terms (confirmed live: "Critical Care", "Obstetrics & Gynecology") also
+matched nurse practitioners, RNs, and pharmacists before that fix.
+
 **Program track:** `search_hospitals` needs no further filter beyond state
 — ready to run the moment the API is deployed. Separately, ACGME's
 CSV-import fallback (`import_acgme_csv`) can source residency/fellowship
