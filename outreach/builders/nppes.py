@@ -9,6 +9,15 @@ but not an email address -- email is resolved downstream by
 reliably present on individual records either, so `org` is left `None` here
 (Google Places / Hunter's domain search can often fill it in later).
 
+`enumeration_type=NPI-1` covers every *individually* enumerated provider,
+not just physicians -- nurses, PAs, pharmacists, and respiratory
+therapists all hold their own NPIs too, and several taxonomy_description
+values (confirmed live: "Critical Care", "Obstetrics & Gynecology") match
+across all of them, not just MD/DO roles. `_to_candidate` filters to a
+physician credential (MD/DO, tolerant of "M.D.", "MD, FACS", etc.) so this
+function's results actually match its name and docstring; records with no
+parseable credential are skipped rather than assumed to be physicians.
+
 Verified live against the real endpoint while building this module:
 `GET https://npiregistry.cms.hhs.gov/api/?version=2.1&state=WA&taxonomy_description=Internal+Medicine`
 returns real, current provider records with no auth required.
@@ -80,6 +89,17 @@ def search_physicians(
     return results[:max_results]
 
 
+def _is_physician_credential(credential):
+    """True if `credential` (NPPES's free-text basic.credential field, e.g.
+    "M.D.", "MD, FACS", "PharmD", "ARNP") contains an MD or DO token. Period-
+    stripped, comma-split, exact-token match -- not a substring check, so
+    "PharmD" doesn't false-positive on containing "MD"."""
+    if not credential:
+        return False
+    tokens = [t.strip().replace(".", "") for t in credential.upper().split(",")]
+    return any(t in ("MD", "DO") for t in tokens)
+
+
 def _to_candidate(record):
     basic = record.get("basic") or {}
     first, last = basic.get("first_name"), basic.get("last_name")
@@ -87,6 +107,9 @@ def _to_candidate(record):
         return None  # not an individual record (or malformed) -- skip
 
     credential = basic.get("credential", "").strip(", ")
+    if not _is_physician_credential(credential):
+        return None  # NP/PA/RN/PharmD/etc. -- not a physician-track candidate
+
     name = " ".join(p for p in (first, last) if p)
     if credential:
         name = f"{name}, {credential}"

@@ -77,6 +77,45 @@ def test_nppes_search_physicians_never_raises_on_request_failure():
     assert results == []
 
 
+_NPPES_MIXED_CREDENTIALS_PAGE = {
+    "result_count": 5,
+    "results": [
+        {
+            "number": "1", "basic": {"first_name": "A", "last_name": "DOC", "credential": "M.D."},
+            "addresses": [], "taxonomies": [],
+        },
+        {
+            "number": "2", "basic": {"first_name": "B", "last_name": "DOC", "credential": "MD, FACS"},
+            "addresses": [], "taxonomies": [],
+        },
+        {
+            "number": "3", "basic": {"first_name": "C", "last_name": "NURSE", "credential": "ARNP"},
+            "addresses": [], "taxonomies": [],
+        },
+        {
+            # real NPPES trap: "PharmD" contains the substring "MD"
+            "number": "4", "basic": {"first_name": "D", "last_name": "PHARM", "credential": "PharmD"},
+            "addresses": [], "taxonomies": [],
+        },
+        {
+            "number": "5", "basic": {"first_name": "E", "last_name": "UNKNOWN", "credential": ""},
+            "addresses": [], "taxonomies": [],
+        },
+    ],
+}
+
+
+def test_nppes_search_physicians_filters_to_md_do_only():
+    with patch("outreach.builders.nppes.requests.get") as mock_get:
+        mock_get.return_value = Mock(
+            status_code=200, json=lambda: _NPPES_MIXED_CREDENTIALS_PAGE, raise_for_status=lambda: None,
+        )
+        results = nppes.search_physicians(state="WA", max_results=200)
+
+    names = {r["name"] for r in results}
+    assert names == {"A DOC, M.D.", "B DOC, MD, FACS"}  # NP/PharmD/blank-credential all excluded
+
+
 # ── hcahps ───────────────────────────────────────────────────────────────
 
 _HCAHPS_ROWS = {
