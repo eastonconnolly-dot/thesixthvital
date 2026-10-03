@@ -10,6 +10,9 @@ __pycache__/
 google-token*.json
 google-oauth-client*.json
 
+# Internal-only, never committed (frank liability tracker, not for repo history)
+LEGAL_REVIEW.md
+
 # Databases
 *.db
 instance/
